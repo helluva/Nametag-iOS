@@ -50,23 +50,29 @@ class ViewController: UIViewController, ARSCNViewDelegate {
 
     @IBOutlet var sceneView: ARSCNView!
     @IBOutlet weak var faceRectView: UIView!
+    @IBOutlet weak var faceLabel: UILabel!
     
     var image: CGImage!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         sceneView.delegate = self
-        
+                
         faceRectView.isHidden = true
         faceRectView.layer.borderColor = UIColor.red.cgColor
         faceRectView.layer.borderWidth = 5
+        faceLabel.isHidden = true
+    }
+    
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+        return .lightContent
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
         // Create a session configuration
-        let configuration = ARWorldTrackingConfiguration()
+        let configuration = AROrientationTrackingConfiguration()
 
         // Run the view's session
         sceneView.session.run(configuration)
@@ -135,19 +141,35 @@ class ViewController: UIViewController, ARSCNViewDelegate {
                         self.faceRectView.frame = facebounds
                         self.faceRectView.isHidden = false
                         
+                        self.renderFaceLabel(faceBounds: facebounds, name: "Cal", display: true)
                         let faceImage = image.crop(rect: facebounds)
                     }
                 } else {
                     DispatchQueue.main.async {
                         self.faceRectView.isHidden = true
+                        self.renderFaceLabel(faceBounds: nil, name: nil, display: false)
                     }
                 }
             }
             if observations.count == 0 {
                 DispatchQueue.main.async {
                     self.faceRectView.isHidden = true
+                    self.renderFaceLabel(faceBounds: nil, name: nil, display: false)
                 }
             }
+        }
+    }
+    
+    func renderFaceLabel(faceBounds: CGRect?, name: String?, display: Bool) {
+        faceLabel.isHidden = !display
+        if display {
+            faceLabel.text = name
+            let labelBounds = CGRect(
+                x: faceBounds!.origin.x,
+                y: faceBounds!.origin.y - faceBounds!.size.height,
+                width: faceBounds!.size.width,
+                height: faceBounds!.size.width)
+            faceLabel.frame = labelBounds
         }
     }
     

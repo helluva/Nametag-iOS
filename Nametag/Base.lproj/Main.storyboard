@@ -24,8 +24,15 @@
                                 <rect key="frame" x="67" y="279" width="240" height="128"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                             </view>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Cal" textAlignment="center" lineBreakMode="tailTruncation" minimumFontSize="10" translatesAutoresizingMaskIntoConstraints="NO" id="cUj-fj-Gfk">
+                                <rect key="frame" x="122" y="202" width="131" height="92"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="100"/>
+                                <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                         <constraints>
                             <constraint firstItem="2jy-vL-20c" firstAttribute="leading" secondItem="Vuy-bY-u7j" secondAttribute="leading" id="HPN-Oi-2kL"/>
                             <constraint firstItem="2jy-vL-20c" firstAttribute="top" secondItem="Vuy-bY-u7j" secondAttribute="top" id="cJj-dz-Vfv"/>
@@ -35,12 +42,14 @@
                         <viewLayoutGuide key="safeArea" id="Vuy-bY-u7j"/>
                     </view>
                     <connections>
+                        <outlet property="faceLabel" destination="cUj-fj-Gfk" id="ImE-GL-Vgg"/>
                         <outlet property="faceRectView" destination="hhj-Z2-BJL" id="yhD-eD-Dp2"/>
                         <outlet property="sceneView" destination="2jy-vL-20c" id="9dX-Y2-I58"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="SZV-WD-TEh" sceneMemberID="firstResponder"/>
             </objects>
+            <point key="canvasLocation" x="32.799999999999997" y="33.733133433283363"/>
         </scene>
     </scenes>
 </document>
