@@ -53,6 +53,9 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     @IBOutlet weak var faceLabel: UILabel!
     
     var image: CGImage!
+    var frameHistory = [CGRect]()
+    var averageBounds: CGRect!
+    var captureImage = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -126,38 +129,75 @@ class ViewController: UIViewController, ARSCNViewDelegate {
                 fatalError("unexpected result type!")
             }
             
+            var cumX = CGFloat(0)
+            var cumY = CGFloat(0)
+            var cumWidth = CGFloat(0)
+            var cumHeight = CGFloat(0)
+            
+            for frame in self.frameHistory {
+                cumX += frame.origin.x
+                cumY += frame.origin.y
+                cumWidth += frame.size.width
+                cumHeight += frame.size.height
+            }
+            
+            self.averageBounds = CGRect(
+                x: cumX / CGFloat(self.frameHistory.count),
+                y: cumY / CGFloat(self.frameHistory.count),
+                width: cumWidth / CGFloat(self.frameHistory.count),
+                height: cumHeight / CGFloat(self.frameHistory.count))
+            
             let largestFace = observations.max(by: { (face1: VNFaceObservation, face2: VNFaceObservation) -> Bool in
                 let face1Area = face1.boundingBox.size.height * face1.boundingBox.size.width
                 let face2Area = face2.boundingBox.size.height * face2.boundingBox.size.width
                 return face1Area < face2Area
             })
             
+            var facebounds: CGRect!
+            
             if let largestFace = largestFace {
                 if largestFace.boundingBox.size.width >= 0.33 {
                     DispatchQueue.main.async {
                         let transform = CGAffineTransform(scaleX: 1, y: -1).translatedBy(x: 0, y: -self.view.frame.height)
                         let translate = CGAffineTransform.identity.scaledBy(x: self.view.frame.width, y: self.view.frame.height)
-                        let facebounds = largestFace.boundingBox.applying(translate).applying(transform)
-                        self.faceRectView.frame = facebounds
-                        self.faceRectView.isHidden = false
+                        facebounds = largestFace.boundingBox.applying(translate).applying(transform)
                         
-                        self.renderFaceLabel(faceBounds: facebounds, name: "Cal", display: true)
-                        let faceImage = image.crop(rect: facebounds)
+                        self.frameHistory.append(facebounds)
+
+                        if self.frameHistory.count > 10 {
+                            self.frameHistory.remove(at: 0)
+                        }
+                        
+                        if self.frameHistory.count > 5 {
+                            self.faceRectView.frame = self.averageBounds
+                        }
+                        
+                        if self.captureImage {
+                            let faceImage = image.crop(rect: self.averageBounds)
+                        }
                     }
                 } else {
-                    DispatchQueue.main.async {
-                        self.faceRectView.isHidden = true
-                        self.renderFaceLabel(faceBounds: nil, name: nil, display: false)
+                    if self.frameHistory.count > 0 {
+                        self.frameHistory.remove(at: 0)
                     }
                 }
-            }
-            if observations.count == 0 {
                 DispatchQueue.main.async {
-                    self.faceRectView.isHidden = true
-                    self.renderFaceLabel(faceBounds: nil, name: nil, display: false)
+                    self.setDisplayLabels()
+                }
+            } else {
+                DispatchQueue.main.async {
+                    self.setDisplayLabels()
+                }
+                if self.frameHistory.count > 0 {
+                    self.frameHistory.remove(at: 0)
                 }
             }
         }
+    }
+    
+    func setDisplayLabels() {
+        self.faceRectView.isHidden = self.frameHistory.count <= 5
+        self.renderFaceLabel(faceBounds: averageBounds, name: "Cal", display: self.frameHistory.count > 5)
     }
     
     func renderFaceLabel(faceBounds: CGRect?, name: String?, display: Bool) {
