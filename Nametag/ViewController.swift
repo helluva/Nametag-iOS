@@ -65,6 +65,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         faceRectView.layer.borderColor = UIColor.red.cgColor
         faceRectView.layer.borderWidth = 5
         faceLabel.isHidden = true
+        
+        SpeechController().setup()
     }
     
     override var preferredStatusBarStyle: UIStatusBarStyle {
