@@ -12,13 +12,14 @@ import ARKit
 import Vision
 
 extension CGImage {
-    func crop( percentageRect: CGRect) -> CGImage {
-        let pixelRect = CGRect(
-            x: percentageRect.origin.x * CGFloat(self.width),
-            y: percentageRect.origin.y * CGFloat(self.height),
-            width: percentageRect.width * CGFloat(self.width),
-            height: percentageRect.height * CGFloat(self.height))
-        let imageRef = self.cropping(to: pixelRect)
+    func crop(rect: CGRect) -> CGImage {
+        let scale = UIScreen.main.scale
+        let scaleRect = CGRect(
+            x: rect.origin.x * scale,
+            y: rect.origin.y * scale,
+            width: rect.size.width * scale,
+            height: rect.size.height * scale)
+        let imageRef = self.cropping(to: scaleRect)
         return imageRef!
     }
     
@@ -127,14 +128,14 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             
             if let largestFace = largestFace {
                 if largestFace.boundingBox.size.width >= 0.33 {
-                    let faceImage = image.crop(percentageRect: largestFace.boundingBox)
-                    
                     DispatchQueue.main.async {
                         let transform = CGAffineTransform(scaleX: 1, y: -1).translatedBy(x: 0, y: -self.view.frame.height)
                         let translate = CGAffineTransform.identity.scaledBy(x: self.view.frame.width, y: self.view.frame.height)
                         let facebounds = largestFace.boundingBox.applying(translate).applying(transform)
                         self.faceRectView.frame = facebounds
                         self.faceRectView.isHidden = false
+                        
+                        let faceImage = image.crop(rect: facebounds)
                     }
                 } else {
                     DispatchQueue.main.async {
