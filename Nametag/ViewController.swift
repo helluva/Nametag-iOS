@@ -11,21 +11,19 @@ import SceneKit
 import ARKit
 import Vision
 
-extension UIImage {
-    func crop( percentageRect: CGRect) -> UIImage {
+extension CGImage {
+    func crop( percentageRect: CGRect) -> CGImage {
         let pixelRect = CGRect(
-            x: percentageRect.origin.x * self.size.width,
-            y: percentageRect.origin.y * self.size.height,
-            width: percentageRect.width * self.size.height,
-            height: percentageRect.height * self.size.width)
-        
-        let imageRef = self.cgImage!.cropping(to: pixelRect)
-        let image = UIImage(cgImage: imageRef!, scale: self.scale, orientation: self.imageOrientation)
-        return image
+            x: percentageRect.origin.x * CGFloat(self.width),
+            y: percentageRect.origin.y * CGFloat(self.height),
+            width: percentageRect.width * CGFloat(self.width),
+            height: percentageRect.height * CGFloat(self.height))
+        let imageRef = self.cropping(to: pixelRect)
+        return imageRef!
     }
     
-    func rotate() -> UIImage {
-        let rotatedSize = CGSize(width: self.size.height, height: self.size.width)
+    func rotate() -> CGImage {
+        let rotatedSize = CGSize(width: self.height, height: self.width)
         // Create the bitmap context
         UIGraphicsBeginImageContext(rotatedSize)
         let bitmap = UIGraphicsGetCurrentContext()!
@@ -38,9 +36,9 @@ extension UIImage {
         
         // Now, draw the rotated/scaled image into the context
         bitmap.scaleBy(x: 1.0, y: -1.0)
-        bitmap.draw(self.cgImage!, in: CGRect(x: -size.width / 2, y: -size.height / 2, width: size.width, height: size.height))
+        bitmap.draw(self, in: CGRect(x: -width / 2, y: -height / 2, width: width, height: height))
         
-        let newImage = UIGraphicsGetImageFromCurrentImageContext()
+        let newImage = UIGraphicsGetImageFromCurrentImageContext()?.cgImage
         UIGraphicsEndImageContext()
         
         return newImage!
@@ -50,12 +48,17 @@ extension UIImage {
 class ViewController: UIViewController, ARSCNViewDelegate {
 
     @IBOutlet var sceneView: ARSCNView!
+    @IBOutlet weak var faceRectView: UIView!
     
-    var image: UIImage!
+    var image: CGImage!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         sceneView.delegate = self
+        
+        faceRectView.isHidden = true
+        faceRectView.layer.borderColor = UIColor.red.cgColor
+        faceRectView.layer.borderWidth = 5
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -98,11 +101,10 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         let temporaryContext = CIContext(options: nil)
         let videoImage = temporaryContext.createCGImage(ciImage, from: CGRect(x: 0, y: 0, width: CVPixelBufferGetWidth(pixelBuffer), height: CVPixelBufferGetHeight(pixelBuffer)))
         
-        image = UIImage(cgImage: videoImage!)
-        image = image.rotate()
+        image = videoImage!.rotate()
         
-        let faceLandmarksRequest = VNDetectFaceRectanglesRequest(completionHandler: self.handleFaceFeatures)
-        let requestHandler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: .right, options: [:])
+        let faceLandmarksRequest = VNDetectFaceRectanglesRequest(completionHandler: self.bindImageToFaceDetectionHandler(image))
+        let requestHandler = VNImageRequestHandler(cgImage: image, orientation: .up, options: [:])
         do {
             try requestHandler.perform([faceLandmarksRequest])
         } catch {
@@ -110,16 +112,41 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         }
     }
 
-    func handleFaceFeatures(request: VNRequest, errror: Error?) {
-        guard let observations = request.results as? [VNFaceObservation] else {
-            fatalError("unexpected result type!")
-        }
+    func bindImageToFaceDetectionHandler(_ image: CGImage) -> ((VNRequest, Error?) -> Void) {
         
-        print(observations)
-        
-        for face in observations {
-            image = image.crop(percentageRect: face.boundingBox)
-            print(image)
+        return { (request: VNRequest, error: Error?) -> Void in
+            guard let observations = request.results as? [VNFaceObservation] else {
+                fatalError("unexpected result type!")
+            }
+            
+            let largestFace = observations.max(by: { (face1: VNFaceObservation, face2: VNFaceObservation) -> Bool in
+                let face1Area = face1.boundingBox.size.height * face1.boundingBox.size.width
+                let face2Area = face2.boundingBox.size.height * face2.boundingBox.size.width
+                return face1Area < face2Area
+            })
+            
+            if let largestFace = largestFace {
+                if largestFace.boundingBox.size.width >= 0.33 {
+                    let faceImage = image.crop(percentageRect: largestFace.boundingBox)
+                    
+                    DispatchQueue.main.async {
+                        let transform = CGAffineTransform(scaleX: 1, y: -1).translatedBy(x: 0, y: -self.view.frame.height)
+                        let translate = CGAffineTransform.identity.scaledBy(x: self.view.frame.width, y: self.view.frame.height)
+                        let facebounds = largestFace.boundingBox.applying(translate).applying(transform)
+                        self.faceRectView.frame = facebounds
+                        self.faceRectView.isHidden = false
+                    }
+                } else {
+                    DispatchQueue.main.async {
+                        self.faceRectView.isHidden = true
+                    }
+                }
+            }
+            if observations.count == 0 {
+                DispatchQueue.main.async {
+                    self.faceRectView.isHidden = true
+                }
+            }
         }
     }
     
