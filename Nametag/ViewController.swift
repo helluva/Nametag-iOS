@@ -11,6 +11,12 @@ import SceneKit
 import ARKit
 import Vision
 
+
+
+let jake = Face(name: "Jake", vectors:[])
+
+
+
 class ViewController: UIViewController, ARSCNViewDelegate {
 
     @IBOutlet var sceneView: ARSCNView!
@@ -19,9 +25,14 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     
     var frameHistory = [CGRect]()
     var averageBounds: CGRect!
-    var captureImage = false
     
     override func viewDidLoad() {
+        
+        if !NTFaceDatabase.faces.contains(where: { $0.name == "Jake" }) {
+            NTFaceDatabase.addFace(jake)
+        }
+        
+        
         super.viewDidLoad()
         sceneView.delegate = self
                 
@@ -31,6 +42,13 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         faceLabel.isHidden = true
         
         SpeechController().setup()
+        
+        /*NametagServerClient.fetchFaceAnalysisResult(image: #imageLiteral(resourceName: "nate-face")) { (vector) in
+            if let vector = vector {
+                let face = Face(name: "Nate", vector: vector)
+                NTFaceDatabase.addFace(face)
+            }
+        }*/
     }
     
     override var preferredStatusBarStyle: UIStatusBarStyle {
@@ -120,12 +138,38 @@ class ViewController: UIViewController, ARSCNViewDelegate {
                 self.faceRectView.frame = self.averageBounds
             }
             
-            if self.captureImage {
-                let faceImage = image.crop(rect: self.averageBounds)
-            }
+            let croppedFace = image.crop(rect: self.averageBounds)
+            self.fetchVectorForFace(in: UIImage(cgImage: croppedFace))
         }
         
     }
+    
+    // MARK: - Calculate vector for face
+    
+    private var previousVectorRequestDate: Date? = nil
+    private let minimumVectorRequestInterval = TimeInterval(1)
+    
+    func fetchVectorForFace(in faceImage: UIImage) {
+        if let previousVectorRequestDate = self.previousVectorRequestDate,
+            Date().timeIntervalSince(previousVectorRequestDate) < minimumVectorRequestInterval
+        {
+            return
+        }
+        
+        previousVectorRequestDate = Date()
+        
+        NametagServerClient.fetchFaceAnalysisResult(image: faceImage, completion: { vector in
+            guard let vector = vector else {
+                return
+            }
+            
+            NTFaceDatabase.mostLikelyFaceMatch(for: vector)
+            
+            //jake.addVector(vector)
+            
+        })
+    }
+    
     
     // Mark: Update Overlays
     
