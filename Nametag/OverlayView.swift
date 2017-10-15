@@ -97,7 +97,7 @@ class OverlayView: UIView {
         loadingIndicator.translatesAutoresizingMaskIntoConstraints = false
         label.text = text
         label.textColor = color
-        label.font = .systemFont(ofSize: CGFloat(size))
+        label.font = .systemFont(ofSize: CGFloat(size), weight: .semibold)
         label.numberOfLines = 0
         label.setContentHuggingPriority(.required, for: .horizontal)
         label.setContentHuggingPriority(.required, for: .vertical)

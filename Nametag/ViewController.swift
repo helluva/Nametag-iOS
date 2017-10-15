@@ -141,7 +141,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     // MARK: - Calculate vector for face
     
     private var previousVectorRequestDate: Date? = nil
-    private let minimumVectorRequestInterval = TimeInterval(1.0)
+    private let minimumVectorRequestInterval = TimeInterval(0.5)
     
     func fetchVectorForFace(in faceImage: UIImage) {
         self.mostRecentFaceImage = (Date(), faceImage)
@@ -191,13 +191,13 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     // MARK: Static overlays
     
     func showBottomIndicator(text: String) {
-        removeCenteredLoadingIndicator(animated: false)
+        removeBottomIndicator(animated: false)
         
         let indicator = OverlayView(
             text: text,
-            showLoadingIndicator: false,
+            showLoadingIndicator: true,
             textColor: .black,
-            textSize: 17)
+            textSize: 20)
         
         view.addSubview(indicator)
         indicator.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
@@ -211,7 +211,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         self.bottomIndicatorView = indicator
     }
     
-    func removeCenteredLoadingIndicator(animated: Bool) {
+    func removeBottomIndicator(animated: Bool) {
         guard let existingIndicator = self.bottomIndicatorView else {
             return
         }
@@ -236,14 +236,23 @@ extension ViewController: SpeechControllerDelegate {
     
     func speechController(_ controller: SpeechController, didDetectIntroductionWithName name: String) {
         
+        guard faceBeingBuilt == nil else {
+            return
+        }
+        
         if let mostRecentFaceImage = self.mostRecentFaceImage,
-            Date().timeIntervalSince(mostRecentFaceImage.date) < 2
+            Date().timeIntervalSince(mostRecentFaceImage.date) < 1.0
         {
-            showBottomIndicator(text: "Detected \(name)")
+            showBottomIndicator(text: "Analyzing \(name)")
             
             let newFace = Face(name: name, image: mostRecentFaceImage.image)
             self.faceBeingBuilt = newFace
             NTFaceDatabase.addFace(newFace)
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(10), execute: {
+                self.faceBeingBuilt = nil
+                self.removeBottomIndicator(animated: true)
+            })
         }
         
         
