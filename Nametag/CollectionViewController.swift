@@ -90,14 +90,32 @@ class CollectionViewController: UIViewController, UICollectionViewDelegateFlowLa
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let name = NTFaceDatabase.faces[indexPath.item].name
+        
         let alert = UIAlertController(
-            title: "Delete \(NTFaceDatabase.faces[indexPath.item].name)?",
-            message: "Do you want to delete \(NTFaceDatabase.faces[indexPath.item].name)?\n(Azure ID = \(NTFaceDatabase.faces[indexPath.item].azureFaceId ?? "n/a"))",
+            title: "Edit \(name)",
+            message: "Delete \(name) or edit the name.",
             preferredStyle: UIAlertControllerStyle.alert)
-        alert.addAction(UIAlertAction(title: "Delete", style: UIAlertActionStyle.default, handler: { _ in
+        alert.addAction(UIAlertAction(title: "Edit Name", style: UIAlertActionStyle.default, handler: { _ in
+            let editor = UIAlertController(
+                title: "Edit Name",
+                message: "Edit the name that belongs to this face.",
+                preferredStyle: UIAlertControllerStyle.alert)
+            editor.addTextField(configurationHandler: { textField in
+                textField.text = name
+            })
+            editor.addAction(UIAlertAction(title: "Done", style: UIAlertActionStyle.default, handler: { _ in
+                NTFaceDatabase.faces[indexPath.item].name = (editor.textFields?.first?.text)!
+                NTFaceDatabase.save()
+                collectionView.reloadData()
+            }))
+            editor.addAction(UIAlertAction(title: "Cancel", style: UIAlertActionStyle.cancel, handler: nil))
+            self.present(editor, animated: true, completion: nil)
+        }))
+        alert.addAction(UIAlertAction(title: "Delete", style: UIAlertActionStyle.destructive, handler: { _ in
             NTFaceDatabase.removeFace(NTFaceDatabase.faces[indexPath.item])
             collectionView.reloadData()
-            }))
+        }))
         alert.addAction(UIAlertAction(title: "Cancel", style: UIAlertActionStyle.cancel, handler: nil))
         self.present(alert, animated: true, completion: nil)
     }

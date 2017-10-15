@@ -12,7 +12,7 @@ import UIKit
 
 class Face: NSObject, NSCoding {
     
-    let name: String
+    var name: String
     let imageName: String
     var azureFaceId: String?
     

@@ -60,6 +60,36 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         self.present(viewController, animated: false, completion: nil)
     }
     
+    @IBAction func pinchGestureRecognizer(_ sender: UIPinchGestureRecognizer) {
+        guard let faceVisibleWhenAlertPresented = self.mostRecentFaceImage?.image,
+            let faceImageDate = self.mostRecentFaceImage?.date,
+            Date().timeIntervalSince(faceImageDate) < 0.5 else
+        {
+            let alert = UIAlertController(
+                title: "No Face Found",
+                message: "Could not find face.",
+                preferredStyle: UIAlertControllerStyle.alert)
+            alert.addAction(UIAlertAction(title: "OK", style: UIAlertActionStyle.default, handler: nil))
+            self.present(alert, animated: true, completion: nil)
+            return
+        }
+        
+        let alert = UIAlertController(
+            title: "Add Face",
+            message: "Add a new face to the library.",
+            preferredStyle: UIAlertControllerStyle.alert)
+        alert.addTextField { (textField) in
+            textField.placeholder = "Name"
+        }
+        alert.addAction(UIAlertAction(title: "Done", style: UIAlertActionStyle.default, handler: { _ in
+            let name = alert.textFields?.first?.text
+            self.mostRecentFaceImage = (Date(), faceVisibleWhenAlertPresented)
+            self.saveNameAndMostRecentFace(name: name!)
+        }))
+        alert.addAction(UIAlertAction(title: "Cancel", style: UIAlertActionStyle.cancel, handler: nil))
+        self.present(alert, animated: true, completion: nil)
+    }
+    
     override var preferredStatusBarStyle: UIStatusBarStyle {
         return .lightContent
     }
@@ -249,11 +279,15 @@ class ViewController: UIViewController, ARSCNViewDelegate {
 extension ViewController: SpeechControllerDelegate {
     
     func speechController(_ controller: SpeechController, didDetectIntroductionWithName name: String) {
+       saveNameAndMostRecentFace(name: name)
+    }
+    
+    func saveNameAndMostRecentFace(name: String) {
         DispatchQueue.main.async {
             if let mostRecentFaceImage = self.mostRecentFaceImage,
                 Date().timeIntervalSince(mostRecentFaceImage.date) < 1.0,
                 !self.waitingForIntroductionResponse
-            {                
+            {
                 let newFace = Face(name: name, image: mostRecentFaceImage.image)
                 NTFaceDatabase.addFace(newFace)
                 
@@ -274,7 +308,7 @@ extension ViewController: SpeechControllerDelegate {
                         })
                     }
                 })
-
+                
             } else {
                 print(Date().timeIntervalSince((self.mostRecentFaceImage?.date)!))
             }

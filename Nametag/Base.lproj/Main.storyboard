@@ -51,6 +51,9 @@
                             <constraint firstItem="Vuy-bY-u7j" firstAttribute="bottom" secondItem="2jy-vL-20c" secondAttribute="bottom" id="eTM-wc-qvY"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="Vuy-bY-u7j"/>
+                        <connections>
+                            <outletCollection property="gestureRecognizers" destination="8Xj-Xg-QEq" appends="YES" id="XJa-Pc-atH"/>
+                        </connections>
                     </view>
                     <connections>
                         <outlet property="faceRectView" destination="hhj-Z2-BJL" id="yhD-eD-Dp2"/>
@@ -64,6 +67,11 @@
                         <action selector="swipeGestureRecognizer:" destination="BV1-FR-VrT" id="3wN-Oy-6fC"/>
                     </connections>
                 </swipeGestureRecognizer>
+                <pinchGestureRecognizer id="8Xj-Xg-QEq">
+                    <connections>
+                        <action selector="pinchGestureRecognizer:" destination="BV1-FR-VrT" id="cUB-zO-7Mz"/>
+                    </connections>
+                </pinchGestureRecognizer>
             </objects>
             <point key="canvasLocation" x="32.799999999999997" y="33.733133433283363"/>
         </scene>
