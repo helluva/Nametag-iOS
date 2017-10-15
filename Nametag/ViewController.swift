@@ -61,6 +61,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     var averageBounds: CGRect!
     
     var mostRecentFaceImage: (date: Date, image: UIImage)?
+    var mostRecentUploadDate: Date!
     
     var overlayView: OverlayView?
     
@@ -178,6 +179,11 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             }
             
             self.mostRecentFaceImage = (Date(), UIImage(cgImage: image.crop(rect: facebounds, padding: 50)))
+            
+            if Date().timeIntervalSince(self.mostRecentUploadDate) > 2.0 {
+                //upload image to azure
+                self.mostRecentUploadDate = Date()
+            }
         }
         
     }

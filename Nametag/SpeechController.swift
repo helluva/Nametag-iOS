@@ -86,7 +86,7 @@ class SpeechController: NSObject, SFSpeechRecognizerDelegate {
             
             self.delegate?.speechController(self, updatedTextTo: "\(resultString)")
             
-            let keywords = ["hi i'm", "hello i'm", "hi i am", "hello i am"]
+            let keywords = ["hi i'm", "hello i'm", "hey i'm", "i am"]
             let existingKeywordRange = keywords.flatMap { keyword -> NSRange? in
                 let range = resultStringLowercased.range(of: keyword)
                 guard range.location != NSNotFound else { return nil }
