@@ -103,7 +103,16 @@ class SpeechController: NSObject, SFSpeechRecognizerDelegate {
                     self.delegate?.speechController(self, didDetectIntroductionWithName: name)
                 }
             }
-                
+            
+            if resultStringLowercased.length > 20 {
+                let words = resultStringLowercased.components(separatedBy: " ")
+                let lastWord = words.last
+                let allPossibleKeywords = keywords.flatMap { $0.components(separatedBy: " ") }
+                if !allPossibleKeywords.contains(lastWord ?? "--") {
+                    isFinal = true
+                }
+            }
+            
             if error != nil || isFinal {
                 self.audioEngine.stop()
                 inputNode.removeTap(onBus: 0)
