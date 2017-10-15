@@ -11,6 +11,7 @@ import UIKit
 class CollectionViewController: UIViewController, UICollectionViewDelegateFlowLayout, UICollectionViewDataSource {
     
     @IBOutlet weak var collectionView: UICollectionView!
+    @IBOutlet weak var noItemsLabel: UILabel!
     
     @IBAction func swipeGestureRecognizer(_ sender: UISwipeGestureRecognizer) {
         performDismissalAnimation()
@@ -20,10 +21,12 @@ class CollectionViewController: UIViewController, UICollectionViewDelegateFlowLa
         super.viewWillAppear(animated)
         preflightPresentationAnimation()
         view.backgroundColor = .clear
+        noItemsLabel.isHidden = true
     }
     
     func preflightPresentationAnimation() {
         collectionView.transform = CGAffineTransform(translationX: view.frame.width, y: 0)
+        noItemsLabel.transform = CGAffineTransform(translationX: view.frame.width + 100, y: 0)
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -40,7 +43,7 @@ class CollectionViewController: UIViewController, UICollectionViewDelegateFlowLa
             options: [],
             animations: {
                 self.collectionView.transform = .identity
-
+                self.noItemsLabel.transform = .identity
         },
             completion: nil)
     }
@@ -59,6 +62,7 @@ class CollectionViewController: UIViewController, UICollectionViewDelegateFlowLa
             options: [],
             animations: {
                 self.collectionView.transform = CGAffineTransform(translationX: self.view.frame.width, y: 0)
+                self.noItemsLabel.transform = CGAffineTransform(translationX: self.view.frame.width + 100, y: 0)
         },
             completion: { _ in
                 self.dismiss(animated: false, completion: nil)
@@ -74,13 +78,14 @@ class CollectionViewController: UIViewController, UICollectionViewDelegateFlowLa
     }
 
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        noItemsLabel.isHidden = NTFaceDatabase.faces.count != 0
         return NTFaceDatabase.faces.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "face", for: indexPath) as! FaceCell
         
-        cell.decorate(for: NTFaceDatabase.faces[indexPath.item].name, and: NTFaceDatabase.faces[indexPath.item].image)
+        cell.decorate(for: NTFaceDatabase.faces[indexPath.item])
         return cell
     }
     
@@ -101,12 +106,19 @@ class CollectionViewController: UIViewController, UICollectionViewDelegateFlowLa
 class FaceCell: UICollectionViewCell {
     @IBOutlet weak var imageView: UIImageView!
     @IBOutlet weak var nameLabel: UILabel!
+    @IBOutlet weak var vectorsLabel: UILabel!
     
-    func decorate(for name: String, and image: UIImage?) {
-        imageView.image = image
+    func decorate(for face: Face) {
+        imageView.image = face.image
         imageView.layer.masksToBounds = true
         imageView.layer.cornerRadius = imageView.frame.height/2
         
-        nameLabel.text = name
+        nameLabel.text = face.name
+        
+        if face.vectors.count == 1 {
+            vectorsLabel.text = "\(face.vectors.count) Vector"
+        } else {
+            vectorsLabel.text = "\(face.vectors.count) Vectors"
+        }
     }
 }
