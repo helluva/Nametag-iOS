@@ -227,7 +227,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     // MARK: AR Overlays
     
     func updateDisplayLabels() {
-        self.faceRectView.isHidden = (self.frameHistory.count <= 4)
+        self.faceRectView.isHidden = (self.frameHistory.count < 2)
 
         let faceText = self.alertTextForOverlayView
         
