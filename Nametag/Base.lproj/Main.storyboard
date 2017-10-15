@@ -37,11 +37,22 @@
                                 <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <nil key="highlightedColor"/>
                             </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text=" " textAlignment="natural" lineBreakMode="headTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="bvt-Ji-Aqs">
+                                <rect key="frame" x="10" y="635.5" width="355" height="21.5"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                <nil key="highlightedColor"/>
+                                <color key="shadowColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                <size key="shadowOffset" width="1" height="1"/>
+                            </label>
                         </subviews>
                         <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                         <gestureRecognizers/>
                         <constraints>
+                            <constraint firstItem="Vuy-bY-u7j" firstAttribute="bottom" secondItem="bvt-Ji-Aqs" secondAttribute="bottom" constant="10" id="BH0-uq-0UC"/>
                             <constraint firstItem="2jy-vL-20c" firstAttribute="leading" secondItem="Vuy-bY-u7j" secondAttribute="leading" id="HPN-Oi-2kL"/>
+                            <constraint firstItem="bvt-Ji-Aqs" firstAttribute="leading" secondItem="Vuy-bY-u7j" secondAttribute="leading" constant="10" id="LfP-KC-s1t"/>
+                            <constraint firstItem="Vuy-bY-u7j" firstAttribute="trailing" secondItem="bvt-Ji-Aqs" secondAttribute="trailing" constant="10" id="OlN-uN-XL8"/>
                             <constraint firstItem="2jy-vL-20c" firstAttribute="top" secondItem="Vuy-bY-u7j" secondAttribute="top" id="cJj-dz-Vfv"/>
                             <constraint firstItem="Vuy-bY-u7j" firstAttribute="trailing" secondItem="2jy-vL-20c" secondAttribute="trailing" id="dse-je-mgE"/>
                             <constraint firstItem="Vuy-bY-u7j" firstAttribute="bottom" secondItem="2jy-vL-20c" secondAttribute="bottom" id="eTM-wc-qvY"/>
@@ -52,6 +63,7 @@
                         <outlet property="faceLabel" destination="cUj-fj-Gfk" id="ImE-GL-Vgg"/>
                         <outlet property="faceRectView" destination="hhj-Z2-BJL" id="yhD-eD-Dp2"/>
                         <outlet property="sceneView" destination="2jy-vL-20c" id="9dX-Y2-I58"/>
+                        <outlet property="spokenTextLabel" destination="bvt-Ji-Aqs" id="1aT-nl-qSX"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="SZV-WD-TEh" sceneMemberID="firstResponder"/>

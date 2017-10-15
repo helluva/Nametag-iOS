@@ -12,6 +12,7 @@ import Speech
 
 protocol SpeechControllerDelegate: class {
     func speechController(_ controller: SpeechController, didDetectIntroductionWithName name: String)
+    func speechController(_ controller: SpeechController, updatedTextTo spokenText: String)
 }
 
 class SpeechController: NSObject, SFSpeechRecognizerDelegate {
@@ -82,6 +83,8 @@ class SpeechController: NSObject, SFSpeechRecognizerDelegate {
             
             let resultString = bestTranscription as NSString
             let resultStringLowercased = bestTranscription.lowercased() as NSString
+            
+            self.delegate?.speechController(self, updatedTextTo: "\(resultString)")
             
             let keywords = ["hi i'm", "hello i'm", "hi i am", "hello i am"]
             let existingKeywordRange = keywords.flatMap { keyword -> NSRange? in

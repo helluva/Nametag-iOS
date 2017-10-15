@@ -11,11 +11,18 @@ import SceneKit
 import ARKit
 import Vision
 
+enum FaceMode {
+    case waitingForInput
+    case analyzingIntroduction(Face)
+    case queryDatabase
+}
+
 class ViewController: UIViewController, ARSCNViewDelegate {
 
     @IBOutlet var sceneView: ARSCNView!
     @IBOutlet weak var faceRectView: UIView!
     @IBOutlet weak var faceLabel: UILabel!
+    @IBOutlet weak var spokenTextLabel: UILabel!
     
     let speechController = SpeechController()
     
@@ -261,22 +268,28 @@ extension ViewController: SpeechControllerDelegate {
             return
         }
         
-        if let mostRecentFaceImage = self.mostRecentFaceImage,
-            Date().timeIntervalSince(mostRecentFaceImage.date) < 1.0
-        {
-            showBottomIndicator(text: "Analyzing \(name)")
-            
-            let newFace = Face(name: name, image: mostRecentFaceImage.image)
-            self.faceBeingBuilt = newFace
-            NTFaceDatabase.addFace(newFace)
-            
-            DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(10), execute: {
-                self.faceBeingBuilt = nil
-                self.removeBottomIndicator(animated: true)
-            })
+        DispatchQueue.main.async {
+            if let mostRecentFaceImage = self.mostRecentFaceImage,
+                Date().timeIntervalSince(mostRecentFaceImage.date) < 1.0
+            {
+                self.showBottomIndicator(text: "Analyzing \(name)")
+                
+                let newFace = Face(name: name, image: mostRecentFaceImage.image)
+                self.faceBeingBuilt = newFace
+                NTFaceDatabase.addFace(newFace)
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(10), execute: {
+                    self.faceBeingBuilt = nil
+                    self.removeBottomIndicator(animated: true)
+                })
+            }
         }
-        
-        
+    }
+    
+    func speechController(_ controller: SpeechController, updatedTextTo spokenText: String) {
+        DispatchQueue.main.async {
+            self.spokenTextLabel.text = spokenText
+        }
     }
     
 }
