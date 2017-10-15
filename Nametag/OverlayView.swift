@@ -62,7 +62,7 @@ class OverlayView: UIView {
     }
     
     private func setUpContentView() {
-        contentView.backgroundColor = .white
+        contentView.backgroundColor = UIColor.white.withAlphaComponent(0.8)
         contentView.layer.cornerRadius = frame.height / 4
         contentView.layer.masksToBounds = true
         

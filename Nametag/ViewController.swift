@@ -45,9 +45,11 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         sceneView.delegate = self
         
         faceRectView.isHidden = true
-        faceRectView.layer.borderColor = UIColor.red.cgColor
-        faceRectView.layer.borderWidth = 5
-        
+        faceRectView.layer.borderColor = UIColor.white.cgColor
+        faceRectView.alpha = 0.8
+        faceRectView.layer.borderWidth = 3
+        faceRectView.layer.cornerRadius = 15
+
         speechController.setup()
         speechController.delegate = self
         
