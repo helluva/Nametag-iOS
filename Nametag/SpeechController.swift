@@ -93,7 +93,7 @@ class SpeechController: NSObject, SFSpeechRecognizerDelegate {
             if let existingKeywordRange = existingKeywordRange {
                 let index = existingKeywordRange.location + existingKeywordRange.length
                 if index < resultString.length {
-                    let name = resultString.substring(from: index)
+                    let name = resultString.substring(from: index).trimmingCharacters(in: .whitespaces)
                     print("NAME: \(name)")
                     isFinal = true
                     

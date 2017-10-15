@@ -9,7 +9,7 @@
 import UIKit
 
 
-let NTResetFaceDatabaseOnLaunch = true
+let NTResetFaceDatabaseOnLaunch = false
 
 let NTFaceDatabaseKey = "NTFaceDatabaseKey"
 let NTFaceDatabase  = UserDefaults.standard.codedObjectForKey(NTFaceDatabaseKey) as? FaceDatabase ?? FaceDatabase()
@@ -46,6 +46,13 @@ class FaceDatabase: NSObject, NSCoding {
     func addFace(_ face: Face) {
         faces.append(face)
         save()
+    }
+    
+    func removeFace(_ face: Face) {
+        if let index = faces.index(of: face) {
+            faces.remove(at: index)
+            save()
+        }
     }
     
     // MARK: Calculations
