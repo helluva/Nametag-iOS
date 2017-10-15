@@ -271,7 +271,9 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             overlayView.layoutSubviews()
             
             let widthDifference = abs(overlayView.frame.size.width - faceBounds.size.width) / 4
-            overlayView.transform = CGAffineTransform(translationX: faceBounds.origin.x + widthDifference, y: faceBounds.origin.y - 75)
+            overlayView.transform = CGAffineTransform(
+                translationX: faceBounds.origin.x + widthDifference,
+                y: faceBounds.origin.y - overlayView.frame.height - 35)
         }
     }    
 }
