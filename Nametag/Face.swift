@@ -79,7 +79,7 @@ class Face: NSObject, NSCoding {
         guard vectors.count > 0 else { return .greatestFiniteMagnitude }
         
         let similaritySum = vectors.reduce(Double(0), { sum, vector in
-            return similarity(between: vector, and: comparisonVector)
+            return sum + similarity(between: vector, and: comparisonVector)
         })
         
         return similaritySum / Double(vectors.count)
@@ -92,6 +92,6 @@ class Face: NSObject, NSCoding {
             return sum + pow(items.0 - items.1, 2)
         })
         
-        return sum
+        return sqrt(sum)
     }
 }

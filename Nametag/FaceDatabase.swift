@@ -8,7 +8,6 @@
 
 import UIKit
 
-
 let NTResetFaceDatabaseOnLaunch = false
 
 let NTFaceDatabaseKey = "NTFaceDatabaseKey"
@@ -69,7 +68,7 @@ class FaceDatabase: NSObject, NSCoding {
         
         print(stringArray.description)
         
-        return nil
+        return sortedFaces.first
     }
     
 }

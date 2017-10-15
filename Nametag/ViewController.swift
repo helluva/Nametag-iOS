@@ -14,7 +14,38 @@ import Vision
 enum FaceMode {
     case waitingForInput
     case analyzingIntroduction(Face)
-    case queryDatabase
+    case detectPeople(detected: Face?)
+    
+    var faceBeingBuilt: Face? {
+        switch self {
+        case .analyzingIntroduction(let face):
+            return face
+        default:
+            return nil
+        }
+    }
+    
+    var isWaitingForInput: Bool {
+        switch self {
+        case .waitingForInput: return true
+        default: return false
+        }
+    }
+    
+    var isAnalyzingIntroduction: Bool {
+        switch(self) {
+        case .analyzingIntroduction(_): return true
+        default: return false
+        }
+    }
+    
+    var isDetectingPeople: Bool {
+        switch(self) {
+        case .detectPeople(_): return true
+        default: return false
+        }
+    }
+    
 }
 
 class ViewController: UIViewController, ARSCNViewDelegate {
@@ -23,6 +54,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     @IBOutlet weak var faceRectView: UIView!
     @IBOutlet weak var faceLabel: UILabel!
     @IBOutlet weak var spokenTextLabel: UILabel!
+    @IBOutlet weak var detectPeopleButton: UIButton!
     
     let speechController = SpeechController()
     
@@ -33,7 +65,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     
     var bottomIndicatorView: OverlayView?
     
-    var faceBeingBuilt: Face?
+    var mode = FaceMode.waitingForInput
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -114,7 +146,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             }
             
             DispatchQueue.main.async {
-                self.setDisplayLabels()
+                self.updateDisplayLabels()
             }
         }
     }
@@ -167,7 +199,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         previousVectorRequestDate = Date()
         
-        if let faceBeingBuilt = self.faceBeingBuilt {
+        // build the face with additional vectors
+        if let faceBeingBuilt = self.mode.faceBeingBuilt {
             NametagServerClient.fetchFaceAnalysisResult(image: faceImage, completion: { vector in
                 guard let vector = vector else {
                     return
@@ -177,15 +210,46 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             })
         }
         
-        
+        // detect people from the database
+        if self.mode.isDetectingPeople {
+            NametagServerClient.fetchFaceAnalysisResult(image: faceImage, completion: { vector in
+                guard let vector = vector else {
+                    return
+                }
+                
+                if let possibleFace = NTFaceDatabase.mostLikelyFaceMatch(for: vector) {
+                    self.mode = .detectPeople(detected: possibleFace)
+                    DispatchQueue.main.async {
+                        self.updateDisplayLabels()
+                    }
+                }
+            })
+        }
     }
     
     
     // MARK: AR Overlays
     
-    func setDisplayLabels() {
-        self.faceRectView.isHidden = self.frameHistory.count <= 4
-        self.renderFaceLabel(faceBounds: averageBounds, name: "Cal", display: self.frameHistory.count > 2)
+    func updateDisplayLabels() {
+        self.faceRectView.isHidden = (self.frameHistory.count <= 4)
+        self.detectPeopleButton.isHidden = (!self.mode.isWaitingForInput)
+        self.spokenTextLabel.isHidden = (self.mode.isDetectingPeople)
+        
+        let faceText: String
+        switch self.mode {
+        case .analyzingIntroduction(_):
+            faceText = "Analyzing..."
+        case .detectPeople(detected: let face):
+            if let detectedFace = face {
+                faceText = detectedFace.name
+            } else {
+                faceText = "Calculating vector..."
+            }
+        default:
+            faceText = ""
+        }
+        
+        self.renderFaceLabel(faceBounds: averageBounds, name: faceText, display: self.frameHistory.count > 2)
     }
     
     func renderFaceLabel(faceBounds: CGRect?, name: String?, display: Bool) {
@@ -247,6 +311,18 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         bottomIndicatorView = nil
     }
     
+    // MARK: Buttons
+    
+    @IBAction func userTappedDetectPeopleButton() {
+        if self.mode.isWaitingForInput {
+            self.mode = .detectPeople(detected: nil)
+            self.detectPeopleButton.setImage(#imageLiteral(resourceName: "cancel"), for: .normal)
+        } else if self.mode.isDetectingPeople {
+            self.mode = .waitingForInput
+            self.detectPeopleButton.setImage(#imageLiteral(resourceName: "who"), for: .normal)
+        }
+    }
+    
     
 }
 
@@ -256,7 +332,7 @@ extension ViewController: SpeechControllerDelegate {
     
     func speechController(_ controller: SpeechController, didDetectIntroductionWithName name: String) {
         
-        guard faceBeingBuilt == nil else {
+        guard mode.isWaitingForInput else {
             return
         }
         
@@ -267,11 +343,11 @@ extension ViewController: SpeechControllerDelegate {
                 self.showBottomIndicator(text: "Analyzing \(name)")
                 
                 let newFace = Face(name: name, image: mostRecentFaceImage.image)
-                self.faceBeingBuilt = newFace
+                self.mode = .analyzingIntroduction(newFace)
                 NTFaceDatabase.addFace(newFace)
                 
                 DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(10), execute: {
-                    self.faceBeingBuilt = nil
+                    self.mode = .waitingForInput
                     self.removeBottomIndicator(animated: true)
                 })
             }
