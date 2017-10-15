@@ -213,7 +213,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
                 self.alertTextForOverlayView = (successfulResult.0.name, .detectionResult)
                 print(successfulResult.1)
             } else {
-                self.alertTextForOverlayView = ("Unknown", .notableResultText)
+                self.alertTextForOverlayView = ("Unknown", .progressText)
             }
             
             DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(1), execute: {
@@ -309,8 +309,6 @@ extension ViewController: SpeechControllerDelegate {
                     }
                 })
                 
-            } else {
-                print(Date().timeIntervalSince((self.mostRecentFaceImage?.date)!))
             }
         }
     }
