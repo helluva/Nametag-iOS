@@ -8,6 +8,9 @@
 
 import UIKit
 
+
+let NTResetFaceDatabaseOnLaunch = true
+
 let NTFaceDatabaseKey = "NTFaceDatabaseKey"
 let NTFaceDatabase  = UserDefaults.standard.codedObjectForKey(NTFaceDatabaseKey) as? FaceDatabase ?? FaceDatabase()
 
@@ -22,7 +25,11 @@ class FaceDatabase: NSObject, NSCoding {
     //MARK: - NSCoding Support
     
     required init?(coder decoder: NSCoder) {
-        self.faces = decoder.decodeObject(forKey: "faces") as? [Face] ?? []
+        if NTResetFaceDatabaseOnLaunch {
+            self.faces = []
+        } else {
+            self.faces = decoder.decodeObject(forKey: "faces") as? [Face] ?? []
+        }
     }
     
     func encode(with coder: NSCoder) {

@@ -9,15 +9,27 @@
 import UIKit
 
 extension CGImage {
-    func crop(rect: CGRect) -> CGImage {
+    func crop(rect: CGRect, padding: CGFloat = 0) -> CGImage {
         let scale = UIScreen.main.scale
-        let scaleRect = CGRect(
+        
+        var scaleRect = CGRect(
             x: rect.origin.x * scale,
             y: rect.origin.y * scale,
             width: rect.size.width * scale,
             height: rect.size.height * scale)
-        let imageRef = self.cropping(to: scaleRect)
-        return imageRef!
+        
+        let unpadded = self.cropping(to: scaleRect)
+        
+        if padding != 0 {
+            scaleRect.origin.x = max(0, scaleRect.origin.x - padding)
+            scaleRect.origin.y = max(0, scaleRect.origin.y - padding)
+            scaleRect.size.width = min(scaleRect.width + (padding*2), CGFloat(self.width) - scaleRect.origin.x)
+            scaleRect.size.height = min(scaleRect.height + (padding*2), CGFloat(self.height) - scaleRect.origin.y)
+        }
+        
+        
+        let paddedImage = self.cropping(to: scaleRect)
+        return paddedImage!
     }
     
     func rotate() -> CGImage {
