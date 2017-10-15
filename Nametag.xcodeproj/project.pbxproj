@@ -11,15 +11,14 @@
 		2E50415F1F92BC8100F510F2 /* [CGRect]+Average.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E50415E1F92BC8100F510F2 /* [CGRect]+Average.swift */; };
 		2E5041611F92C43D00F510F2 /* FaceDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E5041601F92C43D00F510F2 /* FaceDatabase.swift */; };
 		2E5041631F92CB6D00F510F2 /* Face.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E5041621F92CB6D00F510F2 /* Face.swift */; };
-		2E5041651F92DEFE00F510F2 /* OverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E5041641F92DEFE00F510F2 /* OverlayView.swift */; };
 		2E80F28D1F91DEDF00AE461F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E80F28C1F91DEDF00AE461F /* AppDelegate.swift */; };
 		2E80F2911F91DEDF00AE461F /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E80F2901F91DEDF00AE461F /* ViewController.swift */; };
 		2E80F2941F91DEDF00AE461F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2E80F2921F91DEDF00AE461F /* Main.storyboard */; };
 		2E80F2961F91DEDF00AE461F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2E80F2951F91DEDF00AE461F /* Assets.xcassets */; };
 		2E80F2991F91DEDF00AE461F /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2E80F2971F91DEDF00AE461F /* LaunchScreen.storyboard */; };
-		2E80F2A11F92751E00AE461F /* NametagServerClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E80F2A01F92751E00AE461F /* NametagServerClient.swift */; };
 		4300DA251F92AAB0003511EA /* SpeechController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4300DA241F92AAB0003511EA /* SpeechController.swift */; };
 		436CA2921F92D6610092FAA2 /* CollectionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 436CA2911F92D6610092FAA2 /* CollectionViewController.swift */; };
+		436CA2981F9338300092FAA2 /* OverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 436CA2971F9338300092FAA2 /* OverlayView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -27,7 +26,6 @@
 		2E50415E1F92BC8100F510F2 /* [CGRect]+Average.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "[CGRect]+Average.swift"; sourceTree = "<group>"; };
 		2E5041601F92C43D00F510F2 /* FaceDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceDatabase.swift; sourceTree = "<group>"; };
 		2E5041621F92CB6D00F510F2 /* Face.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Face.swift; sourceTree = "<group>"; };
-		2E5041641F92DEFE00F510F2 /* OverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayView.swift; sourceTree = "<group>"; };
 		2E80F2891F91DEDF00AE461F /* Nametag.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Nametag.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2E80F28C1F91DEDF00AE461F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		2E80F2901F91DEDF00AE461F /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -35,9 +33,9 @@
 		2E80F2951F91DEDF00AE461F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		2E80F2981F91DEDF00AE461F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		2E80F29A1F91DEDF00AE461F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		2E80F2A01F92751E00AE461F /* NametagServerClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NametagServerClient.swift; sourceTree = "<group>"; };
 		4300DA241F92AAB0003511EA /* SpeechController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechController.swift; sourceTree = "<group>"; };
 		436CA2911F92D6610092FAA2 /* CollectionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionViewController.swift; sourceTree = "<group>"; };
+		436CA2971F9338300092FAA2 /* OverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -78,12 +76,11 @@
 				2E80F2951F91DEDF00AE461F /* Assets.xcassets */,
 				2E80F2971F91DEDF00AE461F /* LaunchScreen.storyboard */,
 				2E80F29A1F91DEDF00AE461F /* Info.plist */,
-				2E80F2A01F92751E00AE461F /* NametagServerClient.swift */,
 				2E5041621F92CB6D00F510F2 /* Face.swift */,
 				2E5041601F92C43D00F510F2 /* FaceDatabase.swift */,
 				2E50415C1F92B80A00F510F2 /* UIImage+Rotate.swift */,
 				2E50415E1F92BC8100F510F2 /* [CGRect]+Average.swift */,
-				2E5041641F92DEFE00F510F2 /* OverlayView.swift */,
+				436CA2971F9338300092FAA2 /* OverlayView.swift */,
 			);
 			path = Nametag;
 			sourceTree = "<group>";
@@ -160,7 +157,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				2E5041651F92DEFE00F510F2 /* OverlayView.swift in Sources */,
+				436CA2981F9338300092FAA2 /* OverlayView.swift in Sources */,
 				2E50415F1F92BC8100F510F2 /* [CGRect]+Average.swift in Sources */,
 				2E80F2911F91DEDF00AE461F /* ViewController.swift in Sources */,
 				2E80F28D1F91DEDF00AE461F /* AppDelegate.swift in Sources */,
@@ -168,7 +165,6 @@
 				436CA2921F92D6610092FAA2 /* CollectionViewController.swift in Sources */,
 				2E5041631F92CB6D00F510F2 /* Face.swift in Sources */,
 				4300DA251F92AAB0003511EA /* SpeechController.swift in Sources */,
-				2E80F2A11F92751E00AE461F /* NametagServerClient.swift in Sources */,
 				2E5041611F92C43D00F510F2 /* FaceDatabase.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -307,10 +303,10 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = YT2C78F725;
+				DEVELOPMENT_TEAM = 3Q7XKEDZ36;
 				INFOPLIST_FILE = Nametag/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.helluva.Nametag;
+				PRODUCT_BUNDLE_IDENTIFIER = com.helluvaa.Nametag;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -322,10 +318,10 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = YT2C78F725;
+				DEVELOPMENT_TEAM = 3Q7XKEDZ36;
 				INFOPLIST_FILE = Nametag/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.helluva.Nametag;
+				PRODUCT_BUNDLE_IDENTIFIER = com.helluvaa.Nametag;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";

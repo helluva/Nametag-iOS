@@ -114,11 +114,5 @@ class FaceCell: UICollectionViewCell {
         imageView.layer.cornerRadius = imageView.frame.height/2
         
         nameLabel.text = face.name
-        
-        if face.vectors.count == 1 {
-            vectorsLabel.text = "\(face.vectors.count) Vector"
-        } else {
-            vectorsLabel.text = "\(face.vectors.count) Vectors"
-        }
     }
 }

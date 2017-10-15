@@ -49,10 +49,9 @@ enum FaceMode {
 }
 
 class ViewController: UIViewController, ARSCNViewDelegate {
-
+    
     @IBOutlet var sceneView: ARSCNView!
     @IBOutlet weak var faceRectView: UIView!
-    @IBOutlet weak var faceLabel: UILabel!
     @IBOutlet weak var spokenTextLabel: UILabel!
     @IBOutlet weak var detectPeopleButton: UIButton!
     
@@ -63,21 +62,22 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     
     var mostRecentFaceImage: (date: Date, image: UIImage)?
     
-    var bottomIndicatorView: OverlayView?
+    var overlayView: OverlayView?
     
     var mode = FaceMode.waitingForInput
     
     override func viewDidLoad() {
         super.viewDidLoad()
         sceneView.delegate = self
-                
+        
         faceRectView.isHidden = true
         faceRectView.layer.borderColor = UIColor.red.cgColor
         faceRectView.layer.borderWidth = 5
-        faceLabel.isHidden = true
         
         speechController.setup()
         speechController.delegate = self
+        
+        generateOverlayView()
     }
     
     @IBAction func swipeGestureRecognizer(_ sender: UISwipeGestureRecognizer) {
@@ -101,7 +101,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         super.viewWillDisappear(animated)
         sceneView.session.pause()
     }
-
+    
     // MARK: - VNDetectFaceRectanglesRequest
     
     func renderer(_ renderer: SCNSceneRenderer, updateAtTime time: TimeInterval) {
@@ -110,20 +110,20 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         }
         
         //DispatchQueue.global(qos: .background).async {
-            let ciImage = CIImage(cvPixelBuffer: pixelBuffer)
-            let temporaryContext = CIContext(options: nil)
-            let videoImage = temporaryContext.createCGImage(ciImage, from: CGRect(x: 0, y: 0, width: CVPixelBufferGetWidth(pixelBuffer), height: CVPixelBufferGetHeight(pixelBuffer)))
-            
-            guard let imageFromFeed = videoImage?.rotate() else {
-                return
-            }
-            
-            let request = VNDetectFaceRectanglesRequest(completionHandler: self.bindImageToFaceDetectionHandler(imageFromFeed))
-            let requestHandler = VNImageRequestHandler(cgImage: imageFromFeed, orientation: .up, options: [:])
-            try? requestHandler.perform([request])
+        let ciImage = CIImage(cvPixelBuffer: pixelBuffer)
+        let temporaryContext = CIContext(options: nil)
+        let videoImage = temporaryContext.createCGImage(ciImage, from: CGRect(x: 0, y: 0, width: CVPixelBufferGetWidth(pixelBuffer), height: CVPixelBufferGetHeight(pixelBuffer)))
+        
+        guard let imageFromFeed = videoImage?.rotate() else {
+            return
+        }
+        
+        let request = VNDetectFaceRectanglesRequest(completionHandler: self.bindImageToFaceDetectionHandler(imageFromFeed))
+        let requestHandler = VNImageRequestHandler(cgImage: imageFromFeed, orientation: .up, options: [:])
+        try? requestHandler.perform([request])
         //}
     }
-
+    
     func bindImageToFaceDetectionHandler(_ image: CGImage) -> ((VNRequest, Error?) -> Void) {
         
         return { (request: VNRequest, error: Error?) -> Void in
@@ -178,55 +178,9 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             }
             
             let croppedFace = image.crop(rect: facebounds, padding: 50)
-            self.fetchVectorForFace(in: UIImage(cgImage: croppedFace))
         }
         
     }
-    
-    // MARK: - Calculate vector for face
-    
-    private var previousVectorRequestDate: Date? = nil
-    private let minimumVectorRequestInterval = TimeInterval(0.5)
-    
-    func fetchVectorForFace(in faceImage: UIImage) {
-        self.mostRecentFaceImage = (Date(), faceImage)
-        
-        if let previousVectorRequestDate = self.previousVectorRequestDate,
-            Date().timeIntervalSince(previousVectorRequestDate) < minimumVectorRequestInterval
-        {
-            return
-        }
-        
-        previousVectorRequestDate = Date()
-        
-        // build the face with additional vectors
-        if let faceBeingBuilt = self.mode.faceBeingBuilt {
-            NametagServerClient.fetchFaceAnalysisResult(image: faceImage, completion: { vector in
-                guard let vector = vector else {
-                    return
-                }
-                
-                faceBeingBuilt.addVector(vector)
-            })
-        }
-        
-        // detect people from the database
-        if self.mode.isDetectingPeople {
-            NametagServerClient.fetchFaceAnalysisResult(image: faceImage, completion: { vector in
-                guard let vector = vector else {
-                    return
-                }
-                
-                if let possibleFace = NTFaceDatabase.mostLikelyFaceMatch(for: vector) {
-                    self.mode = .detectPeople(detected: possibleFace)
-                    DispatchQueue.main.async {
-                        self.updateDisplayLabels()
-                    }
-                }
-            })
-        }
-    }
-    
     
     // MARK: AR Overlays
     
@@ -234,81 +188,45 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         self.faceRectView.isHidden = (self.frameHistory.count <= 4)
         self.detectPeopleButton.isHidden = (!self.mode.isWaitingForInput)
         self.spokenTextLabel.isHidden = (self.mode.isDetectingPeople)
+
+        let faceText = "Name"
         
-        let faceText: String
-        switch self.mode {
-        case .analyzingIntroduction(_):
-            faceText = "Analyzing..."
-        case .detectPeople(detected: let face):
-            if let detectedFace = face {
-                faceText = detectedFace.name
-            } else {
-                faceText = "Calculating vector..."
-            }
-        default:
-            faceText = ""
-        }
-        
-        self.renderFaceLabel(faceBounds: averageBounds, name: faceText, display: self.frameHistory.count > 2)
-    }
-    
-    func renderFaceLabel(faceBounds: CGRect?, name: String?, display: Bool) {
-        faceLabel.isHidden = !display
-        if display {
-            let strokeTextAttributes: [NSAttributedStringKey : Any] = [
-                NSAttributedStringKey.strokeColor : UIColor.black,
-                NSAttributedStringKey.foregroundColor : UIColor.white,
-                NSAttributedStringKey.strokeWidth : -2.0,
-                ]
-            
-            faceLabel.attributedText = NSAttributedString(string: name!, attributes: strokeTextAttributes)
-            
-            let labelBounds = CGRect(
-                x: faceBounds!.origin.x,
-                y: faceBounds!.origin.y - faceBounds!.size.height,
-                width: faceBounds!.size.width,
-                height: faceBounds!.size.width)
-            faceLabel.frame = labelBounds
-        }
+        self.updateOverlayView(faceBounds: averageBounds, name: faceText, display: self.frameHistory.count > 2)
+        print(self.frameHistory.count)
     }
     
     // MARK: Static overlays
     
-    func showBottomIndicator(text: String) {
-        removeBottomIndicator(animated: false)
-        
+    func generateOverlayView() {
         let indicator = OverlayView(
-            text: text,
-            showLoadingIndicator: true,
+            text: "Testing",
+            showLoadingIndicator: false,
             textColor: .black,
             textSize: 20)
         
+        self.overlayView = indicator
+        
         view.addSubview(indicator)
-        indicator.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
-        indicator.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -10).isActive = true
+        overlayView?.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 20).isActive = true
+        overlayView?.topAnchor.constraint(equalTo: view.topAnchor, constant: 20).isActive = true
         
-        if self.bottomIndicatorView == nil {
-            indicator.alpha = 0
-            indicator.playAppearAnimation()
-        }
-        
-        self.bottomIndicatorView = indicator
+        overlayView?.isHidden = true
     }
     
-    func removeBottomIndicator(animated: Bool) {
-        guard let existingIndicator = self.bottomIndicatorView else {
+    func updateOverlayView(faceBounds: CGRect?, name: String, display: Bool) {
+        
+        guard let faceBounds = faceBounds,
+            let overlayView = overlayView else
+        {
             return
         }
         
-        if animated {
-            existingIndicator.playDisappearAnimation(then: {
-                existingIndicator.removeFromSuperview()
-            })
-        } else {
-            existingIndicator.removeFromSuperview()
+        overlayView.isHidden = !display
+        if display {
+            let widthDifference = abs(overlayView.frame.size.width - faceBounds.size.width) / 4
+            overlayView.transform = CGAffineTransform(translationX: faceBounds.origin.x + widthDifference, y: faceBounds.origin.y - 75)
+            overlayView.label.text = name
         }
-        
-        bottomIndicatorView = nil
     }
     
     // MARK: Buttons
@@ -339,16 +257,13 @@ extension ViewController: SpeechControllerDelegate {
         DispatchQueue.main.async {
             if let mostRecentFaceImage = self.mostRecentFaceImage,
                 Date().timeIntervalSince(mostRecentFaceImage.date) < 1.0
-            {
-                self.showBottomIndicator(text: "Analyzing \(name)")
-                
+            {                
                 let newFace = Face(name: name, image: mostRecentFaceImage.image)
                 self.mode = .analyzingIntroduction(newFace)
                 NTFaceDatabase.addFace(newFace)
                 
                 DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(10), execute: {
                     self.mode = .waitingForInput
-                    self.removeBottomIndicator(animated: true)
                 })
             }
         }
