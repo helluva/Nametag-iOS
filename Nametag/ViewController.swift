@@ -11,6 +11,12 @@ import SceneKit
 import ARKit
 import Vision
 
+extension UIFont {
+    static let detectionResult = UIFont.systemFont(ofSize: 30, weight: .bold)
+    static let notableResultText = UIFont.systemFont(ofSize: 24, weight: .semibold)
+    static let progressText = UIFont.systemFont(ofSize: 13, weight: .medium)
+}
+
 class ViewController: UIViewController, ARSCNViewDelegate {
     
     @IBOutlet var sceneView: ARSCNView!
@@ -27,7 +33,10 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     var mostRecentUploadDate = Date.distantPast
     
     var overlayView: OverlayView?
-    var alertTextForOverlayView: String?
+    
+    var alertTextForOverlayView: (text: String, font: UIFont)?
+    
+    
     var waitingForIntroductionResponse = false
     var waitingForDetectionResponse = false
     
@@ -157,9 +166,9 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     
     func compareFaceToKnownFaces(image: UIImage) {
         
-        let overlayIsNameText = NTFaceDatabase.faces.map({ $0.name }).contains(alertTextForOverlayView ?? "----")
+        let overlayIsNameText = NTFaceDatabase.faces.map({ $0.name }).contains(alertTextForOverlayView?.text ?? "----")
         if !overlayIsNameText {
-            alertTextForOverlayView = "Checking face..."
+            alertTextForOverlayView = ("Checking face...", .progressText)
         }
         
         waitingForDetectionResponse = true
@@ -171,10 +180,10 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             }
             
             if let successfulResult = comparisonResult {
-                self.alertTextForOverlayView = successfulResult.0.name
+                self.alertTextForOverlayView = (successfulResult.0.name, .detectionResult)
                 print(successfulResult.1)
             } else {
-                self.alertTextForOverlayView = "Unknown"
+                self.alertTextForOverlayView = ("Unknown", .notableResultText)
             }
             
             DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(1), execute: {
@@ -190,8 +199,11 @@ class ViewController: UIViewController, ARSCNViewDelegate {
 
         let faceText = self.alertTextForOverlayView
         
-        self.updateOverlayView(faceBounds: averageBounds, name: faceText, display: self.frameHistory.count > 2)
-        print(self.frameHistory.count)
+        self.updateOverlayView(
+            faceBounds: averageBounds,
+            name: faceText?.text,
+            font: faceText?.font,
+            display: self.frameHistory.count > 2)
     }
     
     // MARK: Static overlays
@@ -212,7 +224,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         overlayView?.isHidden = true
     }
     
-    func updateOverlayView(faceBounds: CGRect?, name: String?, display: Bool) {
+    func updateOverlayView(faceBounds: CGRect?, name: String?, font: UIFont?, display: Bool) {
         
         guard let faceBounds = faceBounds,
             let overlayView = overlayView else
@@ -222,9 +234,12 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         overlayView.isHidden = !display || name == nil
         if display {
+            overlayView.label.text = name ?? "--"
+            overlayView.label.font = font ?? overlayView.label.font
+            overlayView.layoutSubviews()
+            
             let widthDifference = abs(overlayView.frame.size.width - faceBounds.size.width) / 4
             overlayView.transform = CGAffineTransform(translationX: faceBounds.origin.x + widthDifference, y: faceBounds.origin.y - 75)
-            overlayView.label.text = name ?? "--"
         }
     }    
 }
@@ -243,11 +258,11 @@ extension ViewController: SpeechControllerDelegate {
                 NTFaceDatabase.addFace(newFace)
                 
                 
-                self.alertTextForOverlayView = "Uploading \(name)"
+                self.alertTextForOverlayView = ("Uploading \(name)", .progressText)
                 self.waitingForIntroductionResponse = true
                 AzureClient.uploadFaceToAzureList(image: mostRecentFaceImage.image, completion: { faceId in
                     DispatchQueue.main.async {
-                        self.alertTextForOverlayView = "Saved \(name)!"
+                        self.alertTextForOverlayView = ("Saved \(name)!", .notableResultText)
                         
                         newFace.azureFaceId = faceId
                         print("\(name) >> \(faceId ?? "n/a")")
