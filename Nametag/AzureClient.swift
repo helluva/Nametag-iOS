@@ -9,6 +9,7 @@
 import UIKit
 
 typealias FaceId = String
+typealias Confidence = Double
 
 class AzureClient {
     
@@ -34,41 +35,26 @@ class AzureClient {
         })
     }
     
-    /*private static func addFaceToList(from imageUrl: String, completion: @escaping (FaceId?) -> Void) {
-        
-        let body = [
-            "url": imageUrl
-        ]
-        
-        request(to: "facelists/\(faceListID)/persistedFaces", method: "POST", with: body) { (json) in
-            guard let json = json as? [String: Any],
-                let faceId = json["persistedFaceId"] as? String else
-            {
-                completion(nil)
-                return
-            }
-            
-            completion(faceId)
-        }
-    }*/
-    
-    static func compareFaceToKnownFaces(image: UIImage) {
+    static func compareFaceToKnownFaces(image: UIImage, completion: @escaping ((Face, Confidence)?) -> Void) {
         hostImageOnServer(image: image) { url in
             guard let hostedUrl = url else {
+                completion(nil)
                 return
             }
             
             uploadFace(at: hostedUrl, completion: { faceId in
                 guard let faceId = faceId else {
+                    completion(nil)
                     return
                 }
                 
                 let allFaceIds = NTFaceDatabase.allFaceIds
                 guard allFaceIds.count != 0 else {
+                    completion(nil)
                     return
                 }
                 
-                compareFaceId(faceId, to: allFaceIds)
+                compareFaceId(faceId, to: allFaceIds, completion: completion)
             })
             
         }
@@ -92,21 +78,34 @@ class AzureClient {
         }
     }
     
-    private static func compareFaceId(_ faceId: FaceId, to others: [FaceId]) {
+    private static func compareFaceId(_ faceId: FaceId, to others: [FaceId], completion: @escaping ((Face, Confidence)?) -> Void) {
         
         let body: [String: Any] = [
             "faceId": faceId,
-            //"faceListId": faceListID,
             "faceIds": others
         ]
         
         request(to: "findsimilars", method: "POST", with: body) { (jsonResponse) in
             guard let json = jsonResponse as? [[String: Any]] else {
                 print(jsonResponse)
+                completion(nil)
                 return
             }
             
-            print(json)
+            let possibleMostLikelyFaceInfo = json.max(by: {
+                ($0["confidence"] as? Double ?? -1) < ($1["confidence"] as? Double ?? -1)
+            })
+            
+            guard let mostLikelyFaceInfo = possibleMostLikelyFaceInfo,
+                let mostLikelyFaceId = mostLikelyFaceInfo["faceId"] as? String,
+                let confidence = mostLikelyFaceInfo["confidence"] as? Double,
+                let mostLikelyFace = NTFaceDatabase.faces.first(where: { $0.azureFaceId == mostLikelyFaceId }) else
+            {
+                completion(nil)
+                return
+            }
+            
+            completion((mostLikelyFace, confidence))
         }
         
     }

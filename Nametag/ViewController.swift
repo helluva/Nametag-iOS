@@ -28,6 +28,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     
     var overlayView: OverlayView?
     var alertTextForOverlayView: String?
+    var waitingForIntroductionResponse = false
+    var waitingForDetectionResponse = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -142,7 +144,10 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             
             self.mostRecentFaceImage = (Date(), UIImage(cgImage: image.crop(rect: facebounds, padding: 50)))
             
-            if Date().timeIntervalSince(self.mostRecentUploadDate) > 2.0 {
+            if Date().timeIntervalSince(self.mostRecentUploadDate) > 2.0,
+                !self.waitingForIntroductionResponse,
+                !self.waitingForDetectionResponse
+            {
                 //upload image to azure
                 self.mostRecentUploadDate = Date()
                 self.compareFaceToKnownFaces(image: UIImage(cgImage: image))
@@ -151,7 +156,31 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     }
     
     func compareFaceToKnownFaces(image: UIImage) {
-        AzureClient.compareFaceToKnownFaces(image: image)
+        
+        let overlayIsNameText = NTFaceDatabase.faces.map({ $0.name }).contains(alertTextForOverlayView ?? "----")
+        if !overlayIsNameText {
+            alertTextForOverlayView = "Checking face..."
+        }
+        
+        waitingForDetectionResponse = true
+        
+        AzureClient.compareFaceToKnownFaces(image: image, completion: { comparisonResult in
+            guard !self.waitingForIntroductionResponse else {
+                self.waitingForDetectionResponse = false
+                return
+            }
+            
+            if let successfulResult = comparisonResult {
+                self.alertTextForOverlayView = successfulResult.0.name
+                print(successfulResult.1)
+            } else {
+                self.alertTextForOverlayView = "Unknown"
+            }
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(1), execute: {
+                self.waitingForDetectionResponse = false
+            })
+        })
     }
     
     // MARK: AR Overlays
@@ -207,22 +236,25 @@ extension ViewController: SpeechControllerDelegate {
     func speechController(_ controller: SpeechController, didDetectIntroductionWithName name: String) {
         DispatchQueue.main.async {
             if let mostRecentFaceImage = self.mostRecentFaceImage,
-                Date().timeIntervalSince(mostRecentFaceImage.date) < 1.0
+                Date().timeIntervalSince(mostRecentFaceImage.date) < 1.0,
+                !self.waitingForIntroductionResponse
             {                
                 let newFace = Face(name: name, image: mostRecentFaceImage.image)
                 NTFaceDatabase.addFace(newFace)
                 
                 
                 self.alertTextForOverlayView = "Uploading \(name)"
+                self.waitingForIntroductionResponse = true
                 AzureClient.uploadFaceToAzureList(image: mostRecentFaceImage.image, completion: { faceId in
                     DispatchQueue.main.async {
-                        self.alertTextForOverlayView = "Uploaded \(name)!"
+                        self.alertTextForOverlayView = "Saved \(name)!"
                         
                         newFace.azureFaceId = faceId
                         print("\(name) >> \(faceId ?? "n/a")")
                         NTFaceDatabase.save()
                         
                         DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(1), execute: {
+                            self.waitingForIntroductionResponse = false
                             self.alertTextForOverlayView = nil
                         })
                     }
