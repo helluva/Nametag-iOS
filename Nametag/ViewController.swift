@@ -11,43 +11,6 @@ import SceneKit
 import ARKit
 import Vision
 
-enum FaceMode {
-    case waitingForInput
-    case analyzingIntroduction(Face)
-    case detectPeople(detected: Face?)
-    
-    var faceBeingBuilt: Face? {
-        switch self {
-        case .analyzingIntroduction(let face):
-            return face
-        default:
-            return nil
-        }
-    }
-    
-    var isWaitingForInput: Bool {
-        switch self {
-        case .waitingForInput: return true
-        default: return false
-        }
-    }
-    
-    var isAnalyzingIntroduction: Bool {
-        switch(self) {
-        case .analyzingIntroduction(_): return true
-        default: return false
-        }
-    }
-    
-    var isDetectingPeople: Bool {
-        switch(self) {
-        case .detectPeople(_): return true
-        default: return false
-        }
-    }
-    
-}
-
 class ViewController: UIViewController, ARSCNViewDelegate {
     
     @IBOutlet var sceneView: ARSCNView!
@@ -61,11 +24,9 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     var averageBounds: CGRect!
     
     var mostRecentFaceImage: (date: Date, image: UIImage)?
-    var mostRecentUploadDate: Date!
+    var mostRecentUploadDate = Date.distantPast
     
     var overlayView: OverlayView?
-    
-    var mode = FaceMode.waitingForInput
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -192,8 +153,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     
     func updateDisplayLabels() {
         self.faceRectView.isHidden = (self.frameHistory.count <= 4)
-        self.detectPeopleButton.isHidden = (!self.mode.isWaitingForInput)
-        self.spokenTextLabel.isHidden = (self.mode.isDetectingPeople)
 
         let faceText = "Name"
         
@@ -233,21 +192,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             overlayView.transform = CGAffineTransform(translationX: faceBounds.origin.x + widthDifference, y: faceBounds.origin.y - 75)
             overlayView.label.text = name
         }
-    }
-    
-    // MARK: Buttons
-    
-    @IBAction func userTappedDetectPeopleButton() {
-        if self.mode.isWaitingForInput {
-            self.mode = .detectPeople(detected: nil)
-            self.detectPeopleButton.setImage(#imageLiteral(resourceName: "cancel"), for: .normal)
-        } else if self.mode.isDetectingPeople {
-            self.mode = .waitingForInput
-            self.detectPeopleButton.setImage(#imageLiteral(resourceName: "who"), for: .normal)
-        }
-    }
-    
-    
+    }    
 }
 
 // MARK: SpeechControllerDelegate
@@ -255,22 +200,13 @@ class ViewController: UIViewController, ARSCNViewDelegate {
 extension ViewController: SpeechControllerDelegate {
     
     func speechController(_ controller: SpeechController, didDetectIntroductionWithName name: String) {
-        
-        guard mode.isWaitingForInput else {
-            return
-        }
-        
         DispatchQueue.main.async {
             if let mostRecentFaceImage = self.mostRecentFaceImage,
                 Date().timeIntervalSince(mostRecentFaceImage.date) < 1.0
             {                
                 let newFace = Face(name: name, image: mostRecentFaceImage.image)
-                self.mode = .analyzingIntroduction(newFace)
                 NTFaceDatabase.addFace(newFace)
                 
-                DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(2), execute: {
-                    self.mode = .waitingForInput
-                })
             } else {
                 print(Date().timeIntervalSince((self.mostRecentFaceImage?.date)!))
             }
