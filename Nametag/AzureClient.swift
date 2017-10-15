@@ -30,11 +30,11 @@ class AzureClient {
             }
             
             print("hosted new image at \(hostedUrl)")
-            addFaceToList(from: hostedUrl, completion: completion)
+            uploadFace(at: hostedUrl, completion: completion)
         })
     }
     
-    private static func addFaceToList(from imageUrl: String, completion: @escaping (FaceId?) -> Void) {
+    /*private static func addFaceToList(from imageUrl: String, completion: @escaping (FaceId?) -> Void) {
         
         let body = [
             "url": imageUrl
@@ -50,7 +50,7 @@ class AzureClient {
             
             completion(faceId)
         }
-    }
+    }*/
     
     static func compareFaceToKnownFaces(image: UIImage) {
         hostImageOnServer(image: image) { url in
@@ -58,7 +58,7 @@ class AzureClient {
                 return
             }
             
-            uploadTemporaryFace(at: hostedUrl, completion: { faceId in
+            uploadFace(at: hostedUrl, completion: { faceId in
                 guard let faceId = faceId else {
                     return
                 }
@@ -74,7 +74,7 @@ class AzureClient {
         }
     }
     
-    private static func uploadTemporaryFace(at imageUrl: String, completion: @escaping (FaceId?) -> Void) {
+    private static func uploadFace(at imageUrl: String, completion: @escaping (FaceId?) -> Void) {
         
         let body = [
             "url": imageUrl
@@ -96,7 +96,7 @@ class AzureClient {
         
         let body: [String: Any] = [
             "faceId": faceId,
-            "faceListId": faceListID,
+            //"faceListId": faceListID,
             "faceIds": others
         ]
         

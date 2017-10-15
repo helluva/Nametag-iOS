@@ -92,7 +92,7 @@ class CollectionViewController: UIViewController, UICollectionViewDelegateFlowLa
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let alert = UIAlertController(
             title: "Delete \(NTFaceDatabase.faces[indexPath.item].name)?",
-            message: "Do you want to delete \(NTFaceDatabase.faces[indexPath.item].name)?",
+            message: "Do you want to delete \(NTFaceDatabase.faces[indexPath.item].name)?\n(Azure ID = \(NTFaceDatabase.faces[indexPath.item].azureFaceId ?? "n/a"))",
             preferredStyle: UIAlertControllerStyle.alert)
         alert.addAction(UIAlertAction(title: "Delete", style: UIAlertActionStyle.default, handler: { _ in
             NTFaceDatabase.removeFace(NTFaceDatabase.faces[indexPath.item])

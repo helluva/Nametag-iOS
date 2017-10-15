@@ -145,9 +145,13 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             if Date().timeIntervalSince(self.mostRecentUploadDate) > 2.0 {
                 //upload image to azure
                 self.mostRecentUploadDate = Date()
+                self.compareFaceToKnownFaces(image: UIImage(cgImage: image))
             }
         }
-        
+    }
+    
+    func compareFaceToKnownFaces(image: UIImage) {
+        AzureClient.compareFaceToKnownFaces(image: image)
     }
     
     // MARK: AR Overlays
@@ -210,9 +214,13 @@ extension ViewController: SpeechControllerDelegate {
                 
                 
                 self.alertTextForOverlayView = "Uploading \(name)"
-                AzureClient.uploadFaceToAzureList(image: mostRecentFaceImage.image, completion: { _ in
+                AzureClient.uploadFaceToAzureList(image: mostRecentFaceImage.image, completion: { faceId in
                     DispatchQueue.main.async {
                         self.alertTextForOverlayView = "Uploaded \(name)!"
+                        
+                        newFace.azureFaceId = faceId
+                        print("\(name) >> \(faceId ?? "n/a")")
+                        NTFaceDatabase.save()
                         
                         DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(1), execute: {
                             self.alertTextForOverlayView = nil
