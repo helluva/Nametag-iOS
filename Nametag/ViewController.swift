@@ -54,14 +54,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         self.present(viewController, animated: false, completion: nil)
     }
     
-    func preflightPresentationAnimation() {
-        
-    }
-    
-    func performPresentationAnimation() {
-        
-    }
-    
     override var preferredStatusBarStyle: UIStatusBarStyle {
         return .lightContent
     }

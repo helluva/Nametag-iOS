@@ -10,20 +10,10 @@ import UIKit
 
 class CollectionViewController: UIViewController, UICollectionViewDelegateFlowLayout, UICollectionViewDataSource {
     
-    let people = [
-        (name: "Cal", image: #imageLiteral(resourceName: "cal-face")),
-        (name: "Nate", image: #imageLiteral(resourceName: "nate-face"))
-    ]
-    
     @IBOutlet weak var collectionView: UICollectionView!
     
     @IBAction func swipeGestureRecognizer(_ sender: UISwipeGestureRecognizer) {
-        let viewController = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "CameraViewController") as! ViewController
         performDismissalAnimation()
-    }
-    
-    override var preferredStatusBarStyle: UIStatusBarStyle {
-        return .default
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -84,14 +74,27 @@ class CollectionViewController: UIViewController, UICollectionViewDelegateFlowLa
     }
 
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return people.count
+        return NTFaceDatabase.faces.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "face", for: indexPath) as! FaceCell
         
-        cell.decorate(for: people[indexPath.item].name, and: people[indexPath.item].image)
+        cell.decorate(for: NTFaceDatabase.faces[indexPath.item].name, and: NTFaceDatabase.faces[indexPath.item].image)
         return cell
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let alert = UIAlertController(
+            title: "Delete \(NTFaceDatabase.faces[indexPath.item].name)?",
+            message: "Do you want to delete \(NTFaceDatabase.faces[indexPath.item].name)?",
+            preferredStyle: UIAlertControllerStyle.alert)
+        alert.addAction(UIAlertAction(title: "Delete", style: UIAlertActionStyle.default, handler: { _ in
+            NTFaceDatabase.removeFace(NTFaceDatabase.faces[indexPath.item])
+            collectionView.reloadData()
+            }))
+        alert.addAction(UIAlertAction(title: "Cancel", style: UIAlertActionStyle.cancel, handler: nil))
+        self.present(alert, animated: true, completion: nil)
     }
 }
 
@@ -99,7 +102,7 @@ class FaceCell: UICollectionViewCell {
     @IBOutlet weak var imageView: UIImageView!
     @IBOutlet weak var nameLabel: UILabel!
     
-    func decorate(for name: String, and image: UIImage) {
+    func decorate(for name: String, and image: UIImage?) {
         imageView.image = image
         imageView.layer.masksToBounds = true
         imageView.layer.cornerRadius = imageView.frame.height/2
