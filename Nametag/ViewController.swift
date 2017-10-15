@@ -41,6 +41,20 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         speechController.delegate = self
     }
     
+    @IBAction func swipeGestureRecognizer(_ sender: UISwipeGestureRecognizer) {
+        let viewController = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "CollectionViewController") as! CollectionViewController
+        viewController.modalPresentationStyle = .overCurrentContext
+        self.present(viewController, animated: false, completion: nil)
+    }
+    
+    func preflightPresentationAnimation() {
+        
+    }
+    
+    func performPresentationAnimation() {
+        
+    }
+    
     override var preferredStatusBarStyle: UIStatusBarStyle {
         return .lightContent
     }
@@ -178,7 +192,14 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     func renderFaceLabel(faceBounds: CGRect?, name: String?, display: Bool) {
         faceLabel.isHidden = !display
         if display {
-            faceLabel.text = name
+            let strokeTextAttributes: [NSAttributedStringKey : Any] = [
+                NSAttributedStringKey.strokeColor : UIColor.black,
+                NSAttributedStringKey.foregroundColor : UIColor.white,
+                NSAttributedStringKey.strokeWidth : -2.0,
+                ]
+            
+            faceLabel.attributedText = NSAttributedString(string: name!, attributes: strokeTextAttributes)
+            
             let labelBounds = CGRect(
                 x: faceBounds!.origin.x,
                 y: faceBounds!.origin.y - faceBounds!.size.height,

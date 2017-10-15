@@ -19,6 +19,7 @@
 		2E80F2991F91DEDF00AE461F /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2E80F2971F91DEDF00AE461F /* LaunchScreen.storyboard */; };
 		2E80F2A11F92751E00AE461F /* NametagServerClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E80F2A01F92751E00AE461F /* NametagServerClient.swift */; };
 		4300DA251F92AAB0003511EA /* SpeechController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4300DA241F92AAB0003511EA /* SpeechController.swift */; };
+		436CA2921F92D6610092FAA2 /* CollectionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 436CA2911F92D6610092FAA2 /* CollectionViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -36,6 +37,7 @@
 		2E80F29A1F91DEDF00AE461F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		2E80F2A01F92751E00AE461F /* NametagServerClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NametagServerClient.swift; sourceTree = "<group>"; };
 		4300DA241F92AAB0003511EA /* SpeechController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechController.swift; sourceTree = "<group>"; };
+		436CA2911F92D6610092FAA2 /* CollectionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -70,6 +72,7 @@
 			children = (
 				2E80F28C1F91DEDF00AE461F /* AppDelegate.swift */,
 				2E80F2901F91DEDF00AE461F /* ViewController.swift */,
+				436CA2911F92D6610092FAA2 /* CollectionViewController.swift */,
 				4300DA241F92AAB0003511EA /* SpeechController.swift */,
 				2E80F2921F91DEDF00AE461F /* Main.storyboard */,
 				2E80F2951F91DEDF00AE461F /* Assets.xcassets */,
@@ -162,6 +165,7 @@
 				2E80F2911F91DEDF00AE461F /* ViewController.swift in Sources */,
 				2E80F28D1F91DEDF00AE461F /* AppDelegate.swift in Sources */,
 				2E50415D1F92B80A00F510F2 /* UIImage+Rotate.swift in Sources */,
+				436CA2921F92D6610092FAA2 /* CollectionViewController.swift in Sources */,
 				2E5041631F92CB6D00F510F2 /* Face.swift in Sources */,
 				4300DA251F92AAB0003511EA /* SpeechController.swift in Sources */,
 				2E80F2A11F92751E00AE461F /* NametagServerClient.swift in Sources */,
@@ -303,7 +307,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = FZ89A5SZ7C;
+				DEVELOPMENT_TEAM = YT2C78F725;
 				INFOPLIST_FILE = Nametag/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.helluva.Nametag;
@@ -318,7 +322,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = FZ89A5SZ7C;
+				DEVELOPMENT_TEAM = YT2C78F725;
 				INFOPLIST_FILE = Nametag/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.helluva.Nametag;
