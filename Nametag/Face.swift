@@ -14,7 +14,6 @@ class Face: NSObject, NSCoding {
     
     let name: String
     let imageName: String
-    var vectors: [FaceIdVector]
     
     var image: UIImage? {
         guard let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).last,
@@ -31,7 +30,6 @@ class Face: NSObject, NSCoding {
     
     init(name: String, image: UIImage) {
         self.name = name
-        self.vectors = []
         
         let imageName = UUID().uuidString
         self.imageName = imageName
@@ -51,47 +49,17 @@ class Face: NSObject, NSCoding {
     
     func encode(with encoder: NSCoder) {
         encoder.encode(name, forKey: "name")
-        encoder.encode(vectors, forKey: "vectors")
         encoder.encode(imageName, forKey: "imageName")
     }
     
     required init?(coder decoder: NSCoder) {
         guard let name = decoder.decodeObject(forKey: "name") as? String,
-            let vectors = decoder.decodeObject(forKey: "vectors") as? [FaceIdVector],
             let imageName = decoder.decodeObject(forKey: "imageName") as? String else
         {
             return nil
         }
         
         self.name = name
-        self.vectors = vectors
         self.imageName = imageName
-    }
-    
-    func addVector(_ vector: FaceIdVector) {
-        vectors.append(vector)
-        NTFaceDatabase.save()
-    }
-    
-    // MARK: Calculations
-    
-    func totalSimilarity(with comparisonVector: FaceIdVector) -> Double {
-        guard vectors.count > 0 else { return .greatestFiniteMagnitude }
-        
-        let similaritySum = vectors.reduce(Double(0), { sum, vector in
-            return sum + similarity(between: vector, and: comparisonVector)
-        })
-        
-        return similaritySum / Double(vectors.count)
-    }
-    
-    private func similarity(between vector: FaceIdVector, and otherVector: FaceIdVector) -> Double {
-        let zippedVectors = zip(vector, otherVector)
-        
-        let sum = zippedVectors.reduce(Double(0), { sum, items in
-            return sum + pow(items.0 - items.1, 2)
-        })
-        
-        return sqrt(sum)
     }
 }

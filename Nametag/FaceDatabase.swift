@@ -38,8 +38,7 @@ class FaceDatabase: NSObject, NSCoding {
     func save() {
         UserDefaults.standard.setCodedObject(self, forKey: NTFaceDatabaseKey)
         
-        let totalVectors = faces.reduce(0, { sum, face in return sum + face.vectors.count })
-        print("Saved \(faces.count) faces with \(totalVectors) total vectors")
+        print("Saved \(faces.count) faces")
     }
     
     func addFace(_ face: Face) {
@@ -53,24 +52,6 @@ class FaceDatabase: NSObject, NSCoding {
             save()
         }
     }
-    
-    // MARK: Calculations
-    
-    func mostLikelyFaceMatch(for vector: FaceIdVector) -> Face? {
-        
-        let sortedFaces = faces.sorted(by: { left, right in
-            return left.totalSimilarity(with: vector) < right.totalSimilarity(with: vector)
-        })
-        
-        let stringArray = sortedFaces.map { face in
-            return "\(face.name) has similarity \(face.totalSimilarity(with: vector))"
-        }
-        
-        print(stringArray.description)
-        
-        return sortedFaces.first
-    }
-    
 }
 
 ///Add dedicated NSCoding methods to cut down on boilerplate everywhere else
