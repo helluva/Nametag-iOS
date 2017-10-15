@@ -14,6 +14,7 @@ class Face: NSObject, NSCoding {
     
     let name: String
     let imageName: String
+    var azureFaceId: String?
     
     var image: UIImage? {
         guard let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).last,
@@ -50,6 +51,10 @@ class Face: NSObject, NSCoding {
     func encode(with encoder: NSCoder) {
         encoder.encode(name, forKey: "name")
         encoder.encode(imageName, forKey: "imageName")
+        
+        if let azureFaceId = azureFaceId {
+            encoder.encode(azureFaceId, forKey: "azureFaceId")
+        }
     }
     
     required init?(coder decoder: NSCoder) {
@@ -61,5 +66,6 @@ class Face: NSObject, NSCoding {
         
         self.name = name
         self.imageName = imageName
+        self.azureFaceId = decoder.decodeObject(forKey: "azureFaceId") as? String
     }
 }

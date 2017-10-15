@@ -17,6 +17,10 @@ class FaceDatabase: NSObject, NSCoding {
     
     fileprivate(set) var faces: [Face]
     
+    var allFaceIds: [FaceId] {
+        return faces.flatMap { $0.azureFaceId }
+    }
+    
     override init() {
         self.faces = []
     }

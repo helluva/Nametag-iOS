@@ -63,6 +63,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     var mostRecentFaceImage: (date: Date, image: UIImage)?
     
     var overlayView: OverlayView?
+    var alertTextForOverlayView: String?
     
     var mode = FaceMode.waitingForInput
     
@@ -189,7 +190,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         self.detectPeopleButton.isHidden = (!self.mode.isWaitingForInput)
         self.spokenTextLabel.isHidden = (self.mode.isDetectingPeople)
 
-        let faceText = "Name"
+        let faceText = self.alertTextForOverlayView
         
         self.updateOverlayView(faceBounds: averageBounds, name: faceText, display: self.frameHistory.count > 2)
         print(self.frameHistory.count)
@@ -213,7 +214,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         overlayView?.isHidden = true
     }
     
-    func updateOverlayView(faceBounds: CGRect?, name: String, display: Bool) {
+    func updateOverlayView(faceBounds: CGRect?, name: String?, display: Bool) {
         
         guard let faceBounds = faceBounds,
             let overlayView = overlayView else
@@ -221,11 +222,11 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             return
         }
         
-        overlayView.isHidden = !display
+        overlayView.isHidden = !display || name == nil
         if display {
             let widthDifference = abs(overlayView.frame.size.width - faceBounds.size.width) / 4
             overlayView.transform = CGAffineTransform(translationX: faceBounds.origin.x + widthDifference, y: faceBounds.origin.y - 75)
-            overlayView.label.text = name
+            overlayView.label.text = name ?? "--"
         }
     }
     
@@ -261,6 +262,18 @@ extension ViewController: SpeechControllerDelegate {
                 let newFace = Face(name: name, image: mostRecentFaceImage.image)
                 self.mode = .analyzingIntroduction(newFace)
                 NTFaceDatabase.addFace(newFace)
+                
+                self.alertTextForOverlayView = "Uploading \(name)"
+                AzureClient.uploadFaceToAzureList(image: mostRecentFaceImage.image, completion: { _ in
+                    DispatchQueue.main.async {
+                        self.alertTextForOverlayView = "Uploaded \(name)!"
+                        
+                        DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(1), execute: {
+                            self.alertTextForOverlayView = nil
+                        })
+                    }
+                })
+                
                 
                 DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(2), execute: {
                     self.mode = .waitingForInput

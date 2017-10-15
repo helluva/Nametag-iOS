@@ -22,7 +22,7 @@ class AzureClient {
     
     // MARK: Azure requests
     
-    static func uploadFaceToAzure(image: UIImage, completion: @escaping (FaceId?) -> Void) {
+    static func uploadFaceToAzureList(image: UIImage, completion: @escaping (FaceId?) -> Void) {
         hostImageOnServer(image: image, completion: { hostedUrl in
             guard let hostedUrl = hostedUrl else {
                 completion(nil)
@@ -34,7 +34,7 @@ class AzureClient {
         })
     }
     
-    static func addFaceToList(from imageUrl: String, completion: @escaping (FaceId?) -> Void) {
+    private static func addFaceToList(from imageUrl: String, completion: @escaping (FaceId?) -> Void) {
         
         let body = [
             "url": imageUrl
@@ -50,6 +50,65 @@ class AzureClient {
             
             completion(faceId)
         }
+    }
+    
+    static func compareFaceToKnownFaces(image: UIImage) {
+        hostImageOnServer(image: image) { url in
+            guard let hostedUrl = url else {
+                return
+            }
+            
+            uploadTemporaryFace(at: hostedUrl, completion: { faceId in
+                guard let faceId = faceId else {
+                    return
+                }
+                
+                let allFaceIds = NTFaceDatabase.allFaceIds
+                guard allFaceIds.count != 0 else {
+                    return
+                }
+                
+                compareFaceId(faceId, to: allFaceIds)
+            })
+            
+        }
+    }
+    
+    private static func uploadTemporaryFace(at imageUrl: String, completion: @escaping (FaceId?) -> Void) {
+        
+        let body = [
+            "url": imageUrl
+        ]
+        
+        request(to: "detect", method: "POST", with: body) { (json) in
+            guard let json = json as? [[String: Any]],
+                let faceId = json.first?["faceId"] as? String else
+            {
+                completion(nil)
+                return
+            }
+            
+            completion(faceId)
+        }
+    }
+    
+    private static func compareFaceId(_ faceId: FaceId, to others: [FaceId]) {
+        
+        let body: [String: Any] = [
+            "faceId": faceId,
+            "faceListId": faceListID,
+            "faceIds": others
+        ]
+        
+        request(to: "findsimilars", method: "POST", with: body) { (jsonResponse) in
+            guard let json = jsonResponse as? [[String: Any]] else {
+                print(jsonResponse)
+                return
+            }
+            
+            print(json)
+        }
+        
     }
     
     static func request(
