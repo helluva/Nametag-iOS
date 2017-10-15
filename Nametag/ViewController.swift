@@ -183,7 +183,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
                 self.faceRectView.frame = self.averageBounds
             }
             
-            self.mostRecentFaceImage = (Date(), UIImage(cgImage: image.crop(rect: facebounds, padding: 50)))
+            let croppedImage = image.crop(rect: facebounds, padding: 50)
+            self.mostRecentFaceImage = (Date(), UIImage(cgImage: croppedImage))
             
             if Date().timeIntervalSince(self.mostRecentUploadDate) > 2.0,
                 !self.waitingForIntroductionResponse,
@@ -191,7 +192,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             {
                 //upload image to azure
                 self.mostRecentUploadDate = Date()
-                self.compareFaceToKnownFaces(image: UIImage(cgImage: image))
+                self.compareFaceToKnownFaces(image: UIImage(cgImage: croppedImage))
             }
         }
     }
