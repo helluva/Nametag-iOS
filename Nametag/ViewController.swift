@@ -177,7 +177,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
                 self.faceRectView.frame = self.averageBounds
             }
             
-            let croppedFace = image.crop(rect: facebounds, padding: 50)
+            self.mostRecentFaceImage = (Date(), UIImage(cgImage: image.crop(rect: facebounds, padding: 50)))
         }
         
     }
@@ -262,9 +262,11 @@ extension ViewController: SpeechControllerDelegate {
                 self.mode = .analyzingIntroduction(newFace)
                 NTFaceDatabase.addFace(newFace)
                 
-                DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(10), execute: {
+                DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(2), execute: {
                     self.mode = .waitingForInput
                 })
+            } else {
+                print(Date().timeIntervalSince((self.mostRecentFaceImage?.date)!))
             }
         }
     }

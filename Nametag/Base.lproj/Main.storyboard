@@ -130,7 +130,7 @@
                                                     </constraints>
                                                 </imageView>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" verticalCompressionResistancePriority="1000" text="Label" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="coN-Wk-Ft1">
-                                                    <rect key="frame" x="0.0" y="152" width="182" height="24"/>
+                                                    <rect key="frame" x="0.0" y="157" width="182" height="29"/>
                                                     <fontDescription key="fontDescription" type="system" weight="medium" pointSize="20"/>
                                                     <nil key="textColor"/>
                                                     <nil key="highlightedColor"/>
@@ -138,8 +138,9 @@
                                             </subviews>
                                         </view>
                                         <constraints>
-                                            <constraint firstItem="coN-Wk-Ft1" firstAttribute="top" secondItem="vma-lR-O0U" secondAttribute="bottom" constant="5" id="60R-EL-ttT"/>
+                                            <constraint firstItem="coN-Wk-Ft1" firstAttribute="top" secondItem="vma-lR-O0U" secondAttribute="bottom" constant="10" id="60R-EL-ttT"/>
                                             <constraint firstItem="coN-Wk-Ft1" firstAttribute="leading" secondItem="h0r-eB-uJv" secondAttribute="leadingMargin" id="8fG-MJ-z9z"/>
+                                            <constraint firstAttribute="bottom" secondItem="coN-Wk-Ft1" secondAttribute="bottom" constant="10" id="YTc-li-MfI"/>
                                             <constraint firstAttribute="trailingMargin" secondItem="coN-Wk-Ft1" secondAttribute="trailing" id="ZwF-Z0-m3p"/>
                                             <constraint firstItem="vma-lR-O0U" firstAttribute="top" secondItem="h0r-eB-uJv" secondAttribute="top" constant="5" id="gj5-QK-Xlb"/>
                                             <constraint firstItem="vma-lR-O0U" firstAttribute="leading" secondItem="h0r-eB-uJv" secondAttribute="leading" constant="20" id="sBX-K5-TRC"/>
