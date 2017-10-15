@@ -9,6 +9,9 @@
 /* Begin PBXBuildFile section */
 		2E50415D1F92B80A00F510F2 /* UIImage+Rotate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E50415C1F92B80A00F510F2 /* UIImage+Rotate.swift */; };
 		2E50415F1F92BC8100F510F2 /* [CGRect]+Average.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E50415E1F92BC8100F510F2 /* [CGRect]+Average.swift */; };
+		2E5041611F92C43D00F510F2 /* FaceDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E5041601F92C43D00F510F2 /* FaceDatabase.swift */; };
+		2E5041631F92CB6D00F510F2 /* Face.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E5041621F92CB6D00F510F2 /* Face.swift */; };
+		2E5041651F92DEFE00F510F2 /* OverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E5041641F92DEFE00F510F2 /* OverlayView.swift */; };
 		2E80F28D1F91DEDF00AE461F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E80F28C1F91DEDF00AE461F /* AppDelegate.swift */; };
 		2E80F2911F91DEDF00AE461F /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E80F2901F91DEDF00AE461F /* ViewController.swift */; };
 		2E80F2941F91DEDF00AE461F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2E80F2921F91DEDF00AE461F /* Main.storyboard */; };
@@ -22,6 +25,9 @@
 /* Begin PBXFileReference section */
 		2E50415C1F92B80A00F510F2 /* UIImage+Rotate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImage+Rotate.swift"; sourceTree = "<group>"; };
 		2E50415E1F92BC8100F510F2 /* [CGRect]+Average.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "[CGRect]+Average.swift"; sourceTree = "<group>"; };
+		2E5041601F92C43D00F510F2 /* FaceDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceDatabase.swift; sourceTree = "<group>"; };
+		2E5041621F92CB6D00F510F2 /* Face.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Face.swift; sourceTree = "<group>"; };
+		2E5041641F92DEFE00F510F2 /* OverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayView.swift; sourceTree = "<group>"; };
 		2E80F2891F91DEDF00AE461F /* Nametag.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Nametag.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2E80F28C1F91DEDF00AE461F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		2E80F2901F91DEDF00AE461F /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -73,8 +79,11 @@
 				2E80F2971F91DEDF00AE461F /* LaunchScreen.storyboard */,
 				2E80F29A1F91DEDF00AE461F /* Info.plist */,
 				2E80F2A01F92751E00AE461F /* NametagServerClient.swift */,
+				2E5041621F92CB6D00F510F2 /* Face.swift */,
+				2E5041601F92C43D00F510F2 /* FaceDatabase.swift */,
 				2E50415C1F92B80A00F510F2 /* UIImage+Rotate.swift */,
 				2E50415E1F92BC8100F510F2 /* [CGRect]+Average.swift */,
+				2E5041641F92DEFE00F510F2 /* OverlayView.swift */,
 			);
 			path = Nametag;
 			sourceTree = "<group>";
@@ -151,13 +160,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2E5041651F92DEFE00F510F2 /* OverlayView.swift in Sources */,
 				2E50415F1F92BC8100F510F2 /* [CGRect]+Average.swift in Sources */,
 				2E80F2911F91DEDF00AE461F /* ViewController.swift in Sources */,
 				2E80F28D1F91DEDF00AE461F /* AppDelegate.swift in Sources */,
 				2E50415D1F92B80A00F510F2 /* UIImage+Rotate.swift in Sources */,
 				436CA2921F92D6610092FAA2 /* CollectionViewController.swift in Sources */,
+				2E5041631F92CB6D00F510F2 /* Face.swift in Sources */,
 				4300DA251F92AAB0003511EA /* SpeechController.swift in Sources */,
 				2E80F2A11F92751E00AE461F /* NametagServerClient.swift in Sources */,
+				2E5041611F92C43D00F510F2 /* FaceDatabase.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

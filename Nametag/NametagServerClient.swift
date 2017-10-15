@@ -8,11 +8,11 @@
 
 import UIKit
 
+typealias FaceIdVector = [Double]
+
 struct NametagServerClient {
     
     static let baseURL = URL(string: "http://server.calstephens.tech:8081")!
-    
-    typealias FaceIdVector = [Double]
     
     static func fetchFaceAnalysisResult(image: UIImage, completion: @escaping (FaceIdVector?) -> Void) {
         

@@ -10,18 +10,22 @@ import Foundation
 import AVFoundation
 import Speech
 
+protocol SpeechControllerDelegate: class {
+    func speechController(_ controller: SpeechController, didDetectIntroductionWithName name: String)
+}
+
 class SpeechController: NSObject, SFSpeechRecognizerDelegate {
     private let speechRecognizer = SFSpeechRecognizer(locale: Locale.init(identifier: "en-US"))
     private var recognitionRequest: SFSpeechAudioBufferRecognitionRequest?
     private var recognitionTask: SFSpeechRecognitionTask?
     private let audioEngine = AVAudioEngine()
     
+    weak var delegate: SpeechControllerDelegate?
+    
     func setup() {
         speechRecognizer?.delegate = self
         
         SFSpeechRecognizer.requestAuthorization { (authStatus) in
-            
-            
             switch authStatus {
             case .authorized:
                 print("Speech recognition authorized!")
@@ -69,8 +73,6 @@ class SpeechController: NSObject, SFSpeechRecognizerDelegate {
             var isFinal = false
             
             if result != nil {
-                
-                print(result?.bestTranscription.formattedString)
                 isFinal = (result?.isFinal)!
             }
             
@@ -94,6 +96,8 @@ class SpeechController: NSObject, SFSpeechRecognizerDelegate {
                     let name = resultString.substring(from: index)
                     print("NAME: \(name)")
                     isFinal = true
+                    
+                    self.delegate?.speechController(self, didDetectIntroductionWithName: name)
                 }
             }
                 

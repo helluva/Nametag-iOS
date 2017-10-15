@@ -17,9 +17,16 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     @IBOutlet weak var faceRectView: UIView!
     @IBOutlet weak var faceLabel: UILabel!
     
+    let speechController = SpeechController()
+    
     var frameHistory = [CGRect]()
     var averageBounds: CGRect!
-    var captureImage = false
+    
+    var mostRecentFaceImage: (date: Date, image: UIImage)?
+    
+    var bottomIndicatorView: OverlayView?
+    
+    var faceBeingBuilt: Face?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -30,7 +37,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         faceRectView.layer.borderWidth = 5
         faceLabel.isHidden = true
         
-        SpeechController().setup()
+        speechController.setup()
+        speechController.delegate = self
     }
     
     @IBAction func swipeGestureRecognizer(_ sender: UISwipeGestureRecognizer) {
@@ -66,19 +74,23 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     // MARK: - VNDetectFaceRectanglesRequest
     
     func renderer(_ renderer: SCNSceneRenderer, updateAtTime time: TimeInterval) {
-        guard let pixelBuffer = sceneView.session.currentFrame?.capturedImage else {return}
-        
-        let ciImage = CIImage(cvPixelBuffer: pixelBuffer)
-        let temporaryContext = CIContext(options: nil)
-        let videoImage = temporaryContext.createCGImage(ciImage, from: CGRect(x: 0, y: 0, width: CVPixelBufferGetWidth(pixelBuffer), height: CVPixelBufferGetHeight(pixelBuffer)))
-        
-        guard let imageFromFeed = videoImage?.rotate() else {
+        guard let pixelBuffer = sceneView.session.currentFrame?.capturedImage else {
             return
         }
         
-        let request = VNDetectFaceRectanglesRequest(completionHandler: self.bindImageToFaceDetectionHandler(imageFromFeed))
-        let requestHandler = VNImageRequestHandler(cgImage: imageFromFeed, orientation: .up, options: [:])
-        try? requestHandler.perform([request])
+        //DispatchQueue.global(qos: .background).async {
+            let ciImage = CIImage(cvPixelBuffer: pixelBuffer)
+            let temporaryContext = CIContext(options: nil)
+            let videoImage = temporaryContext.createCGImage(ciImage, from: CGRect(x: 0, y: 0, width: CVPixelBufferGetWidth(pixelBuffer), height: CVPixelBufferGetHeight(pixelBuffer)))
+            
+            guard let imageFromFeed = videoImage?.rotate() else {
+                return
+            }
+            
+            let request = VNDetectFaceRectanglesRequest(completionHandler: self.bindImageToFaceDetectionHandler(imageFromFeed))
+            let requestHandler = VNImageRequestHandler(cgImage: imageFromFeed, orientation: .up, options: [:])
+            try? requestHandler.perform([request])
+        //}
     }
 
     func bindImageToFaceDetectionHandler(_ image: CGImage) -> ((VNRequest, Error?) -> Void) {
@@ -134,14 +146,43 @@ class ViewController: UIViewController, ARSCNViewDelegate {
                 self.faceRectView.frame = self.averageBounds
             }
             
-            if self.captureImage {
-                let faceImage = image.crop(rect: self.averageBounds)
-            }
+            let croppedFace = image.crop(rect: facebounds, padding: 50)
+            self.fetchVectorForFace(in: UIImage(cgImage: croppedFace))
         }
         
     }
     
-    // Mark: Update Overlays
+    // MARK: - Calculate vector for face
+    
+    private var previousVectorRequestDate: Date? = nil
+    private let minimumVectorRequestInterval = TimeInterval(1.0)
+    
+    func fetchVectorForFace(in faceImage: UIImage) {
+        self.mostRecentFaceImage = (Date(), faceImage)
+        
+        if let previousVectorRequestDate = self.previousVectorRequestDate,
+            Date().timeIntervalSince(previousVectorRequestDate) < minimumVectorRequestInterval
+        {
+            return
+        }
+        
+        previousVectorRequestDate = Date()
+        
+        if let faceBeingBuilt = self.faceBeingBuilt {
+            NametagServerClient.fetchFaceAnalysisResult(image: faceImage, completion: { vector in
+                guard let vector = vector else {
+                    return
+                }
+                
+                faceBeingBuilt.addVector(vector)
+            })
+        }
+        
+        
+    }
+    
+    
+    // MARK: AR Overlays
     
     func setDisplayLabels() {
         self.faceRectView.isHidden = self.frameHistory.count <= 4
@@ -167,4 +208,66 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             faceLabel.frame = labelBounds
         }
     }
+    
+    // MARK: Static overlays
+    
+    func showBottomIndicator(text: String) {
+        removeCenteredLoadingIndicator(animated: false)
+        
+        let indicator = OverlayView(
+            text: text,
+            showLoadingIndicator: false,
+            textColor: .black,
+            textSize: 17)
+        
+        view.addSubview(indicator)
+        indicator.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
+        indicator.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -10).isActive = true
+        
+        if self.bottomIndicatorView == nil {
+            indicator.alpha = 0
+            indicator.playAppearAnimation()
+        }
+        
+        self.bottomIndicatorView = indicator
+    }
+    
+    func removeCenteredLoadingIndicator(animated: Bool) {
+        guard let existingIndicator = self.bottomIndicatorView else {
+            return
+        }
+        
+        if animated {
+            existingIndicator.playDisappearAnimation(then: {
+                existingIndicator.removeFromSuperview()
+            })
+        } else {
+            existingIndicator.removeFromSuperview()
+        }
+        
+        bottomIndicatorView = nil
+    }
+    
+    
+}
+
+// MARK: SpeechControllerDelegate
+
+extension ViewController: SpeechControllerDelegate {
+    
+    func speechController(_ controller: SpeechController, didDetectIntroductionWithName name: String) {
+        
+        if let mostRecentFaceImage = self.mostRecentFaceImage,
+            Date().timeIntervalSince(mostRecentFaceImage.date) < 2
+        {
+            showBottomIndicator(text: "Detected \(name)")
+            
+            let newFace = Face(name: name, image: mostRecentFaceImage.image)
+            self.faceBeingBuilt = newFace
+            NTFaceDatabase.addFace(newFace)
+        }
+        
+        
+    }
+    
 }
