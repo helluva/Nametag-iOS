@@ -186,7 +186,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             let croppedImage = image.crop(rect: facebounds, padding: 50)
             self.mostRecentFaceImage = (Date(), UIImage(cgImage: croppedImage))
             
-            if Date().timeIntervalSince(self.mostRecentUploadDate) > 2.0,
+            if Date().timeIntervalSince(self.mostRecentUploadDate) > 2,
                 !self.waitingForIntroductionResponse,
                 !self.waitingForDetectionResponse
             {
@@ -231,6 +231,11 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         self.faceRectView.isHidden = (self.frameHistory.count < 2)
 
         let faceText = self.alertTextForOverlayView
+        
+        //reset existing matches when the face is gone
+        if (self.frameHistory.count < 2) {
+            self.alertTextForOverlayView = nil
+        }
         
         self.updateOverlayView(
             faceBounds: averageBounds,
